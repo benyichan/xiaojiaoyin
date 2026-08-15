@@ -227,7 +227,14 @@ fun HomeScreen(
                 onSwitch = { showBabyPicker = true }
             )
         }
-        item { InfoCard(baby = state.currentBaby!!, derivedText = state.derived, onEdit = onEdit) }
+        item {
+            InfoCard(
+                baby = state.currentBaby!!,
+                derivedText = state.derived,
+                isPro = isPro,
+                onEdit = onEdit
+            )
+        }
         item { BirthdayCards(derived = state.derived) }
         item {
             QuickActions(
@@ -290,7 +297,12 @@ private fun EmptyHome(onAdd: () -> Unit) {
 }
 
 @Composable
-private fun InfoCard(baby: BabyEntity, derivedText: com.xiaojiaoyin.baby.domain.DerivedInfo?, onEdit: () -> Unit) {
+private fun InfoCard(
+    baby: BabyEntity,
+    derivedText: com.xiaojiaoyin.baby.domain.DerivedInfo?,
+    isPro: Boolean,
+    onEdit: () -> Unit
+) {
     val d = derivedText
     Column(
         modifier = Modifier
@@ -300,6 +312,15 @@ private fun InfoCard(baby: BabyEntity, derivedText: com.xiaojiaoyin.baby.domain.
             .padding(16.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = if (isPro) "Pro 会员" else "免费版",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isPro) Gold else TextSecondary,
+                modifier = Modifier
+                    .background(if (isPro) GoldLight else androidx.compose.ui.graphics.Color(0xFFF0F0EC), RoundedCornerShape(9.dp))
+                    .padding(horizontal = 8.dp, vertical = 3.dp)
+            )
             Text(
                 text = "编辑 ›",
                 fontSize = 12.sp,

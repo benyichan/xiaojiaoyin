@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -21,6 +23,12 @@ import androidx.compose.ui.unit.sp
 import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.xiaojiaoyin.baby.data.AppGraph
+import com.xiaojiaoyin.baby.ui.theme.Gold
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun MineScreen(
@@ -35,6 +43,9 @@ fun MineScreen(
     onOpenSync: () -> Unit = {},
     onOpenPurchase: () -> Unit = {}
 ) {
+    val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
+    val expireAt by AppGraph.proStatusRepository.proExpireAt.collectAsStateWithLifecycle(initialValue = 0L)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -48,6 +59,11 @@ fun MineScreen(
             fontWeight = FontWeight.ExtraBold,
             color = TextPrimary,
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp)
+        )
+        MembershipCard(
+            isPro = isPro,
+            expireAt = expireAt,
+            onUpgrade = onOpenPurchase
         )
         MenuRow("宝宝管理") {}
         MenuRow("待办清单", onClick = onOpenTodo)
@@ -64,6 +80,67 @@ fun MineScreen(
         MenuRow("隐私政策") {}
         MenuRow("关于") {}
     }
+}
+
+@Composable
+private fun MembershipCard(isPro: Boolean, expireAt: Long, onUpgrade: () -> Unit) {
+    if (isPro) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .background(Gold, RoundedCornerShape(18.dp))
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Pro 会员",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = androidx.compose.ui.graphics.Color.White
+            )
+            Text(
+                if (expireAt == 0L) "永久" else "有效期至 ${formatMemberExpire(expireAt)}",
+                fontSize = 12.sp,
+                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.padding(start = 10.dp)
+            )
+        }
+    } else {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .background(Card, RoundedCornerShape(18.dp))
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("免费版", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = TextPrimary)
+                Text(
+                    "升级解锁多宝宝、生长曲线、统计等",
+                    fontSize = 11.sp,
+                    color = TextSecondary,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+            Text(
+                "升级 Pro",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = androidx.compose.ui.graphics.Color.White,
+                modifier = Modifier
+                    .background(Gold, RoundedCornerShape(99.dp))
+                    .clickable(onClick = onUpgrade)
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            )
+        }
+    }
+}
+
+private fun formatMemberExpire(millis: Long): String {
+    val t = Instant.ofEpochMilli(millis).atZone(ZoneId.of("Asia/Shanghai"))
+    return t.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 }
 
 @Composable
