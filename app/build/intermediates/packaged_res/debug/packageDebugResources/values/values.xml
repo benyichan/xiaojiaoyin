@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="ic_launcher_background">#2E9E76</color>
-    <string name="app_name">小脚印</string>
-    <style name="Theme.BabyApp" parent="android:Theme.Material.Light.NoActionBar"/>
-</resources>
