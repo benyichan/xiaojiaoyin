@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,10 +60,27 @@ fun PurchaseScreen(onBack: () -> Unit) {
     val deviceId = remember { LicenseManager.deviceId(context) }
     val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
     val expireAt by AppGraph.proStatusRepository.proExpireAt.collectAsStateWithLifecycle(initialValue = 0L)
+    val promoEndAt by AppGraph.proStatusRepository.promoEndAt.collectAsStateWithLifecycle(initialValue = 0L)
     var codeInput by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
     var copied by remember { mutableStateOf(false) }
     var selectedPlan by remember { mutableStateOf("L") }
+    var now by remember { mutableStateOf(System.currentTimeMillis()) }
+
+    // 限时促销：首次进入购买页设置 18 小时倒计时
+    LaunchedEffect(promoEndAt) {
+        if (promoEndAt == 0L) {
+            AppGraph.proStatusRepository.setPromoEndAt(System.currentTimeMillis() + 18 * 3600 * 1000L)
+        }
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            now = System.currentTimeMillis()
+            kotlinx.coroutines.delay(1000)
+        }
+    }
+    val promoActive = promoEndAt > now
+    val remainingMs = (promoEndAt - now).coerceAtLeast(0)
 
     Column(
         modifier = Modifier
@@ -124,12 +142,29 @@ fun PurchaseScreen(onBack: () -> Unit) {
                 modifier = Modifier.weight(1f)
             ) { selectedPlan = "M" }
             PriceCard(
+                title = "年度",
+                price = if (promoActive) "¥59 / 年" else "¥76.9 / 年",
+                desc = if (promoActive) "原价 ¥76.9 · 限时 77 折" else "12 个月",
+                selected = selectedPlan == "Y",
+                promo = true,
+                modifier = Modifier.weight(1f)
+            ) { selectedPlan = "Y" }
+            PriceCard(
                 title = "永久",
                 price = "¥159",
                 desc = "一次买断",
                 selected = selectedPlan == "L",
                 modifier = Modifier.weight(1f)
             ) { selectedPlan = "L" }
+        }
+        if (promoActive) {
+            Text(
+                "限时促销 77 折 · 剩余 ${formatCountdown(remainingMs)}",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFD96A6A),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+            )
         }
 
         Text(
@@ -139,7 +174,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
             color = TextPrimary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         )
-        StepRow("1", "扫码付款：¥6.8（月）或 ¥159（永久）")
+        StepRow("1", "扫码付款：¥6.8（月）/ ¥59（年）/ ¥159（永久）")
         StepRow("2", "发邮件到 benyi@aliyun.com，附上设备 ID、支付凭证截图和你常用的邮箱")
         StepRow("3", "收到回复的激活码后粘贴到下面，点激活")
 
@@ -213,7 +248,11 @@ fun PurchaseScreen(onBack: () -> Unit) {
                     .padding(top = 10.dp)
                     .background(Mint, RoundedCornerShape(12.dp))
                     .clickable {
-                        val planText = if (selectedPlan == "M") "月度 ¥6.8" else "永久 ¥159"
+                        val planText = when (selectedPlan) {
+                            "M" -> "月度 ¥6.8"
+                            "Y" -> "年度 ¥59（限时 77 折）"
+                            else -> "永久 ¥159"
+                        }
                         val content = "小脚印 Pro 激活申请\n设备 ID：$deviceId\n套餐：$planText\n支付凭证：____（请附上付款截图，如微信支付详情页）\n回执邮箱：____（填你的邮箱）\n已付款，请回复激活码，谢谢！"
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         cm.setPrimaryClip(ClipData.newPlainText("licenseApply", content))
@@ -314,12 +353,13 @@ private fun PriceCard(
     price: String,
     desc: String,
     selected: Boolean,
+    promo: Boolean = false,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 8.dp)
             .background(
                 if (selected) com.xiaojiaoyin.baby.ui.theme.MintLight else Card,
                 RoundedCornerShape(18.dp)
@@ -333,9 +373,23 @@ private fun PriceCard(
             fontWeight = FontWeight.Bold,
             color = if (selected) Mint else TextSecondary
         )
-        Text(price, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Mint, modifier = Modifier.padding(top = 4.dp))
+        Text(
+            price,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = if (promo && selected) Color(0xFFD96A6A) else Mint,
+            modifier = Modifier.padding(top = 4.dp)
+        )
         Text(desc, fontSize = 11.sp, color = TextSecondary, modifier = Modifier.padding(top = 2.dp))
     }
+}
+
+private fun formatCountdown(ms: Long): String {
+    val totalSeconds = ms / 1000
+    val h = totalSeconds / 3600
+    val m = (totalSeconds % 3600) / 60
+    val s = totalSeconds % 60
+    return "%02d:%02d:%02d".format(h, m, s)
 }
 
 @Composable

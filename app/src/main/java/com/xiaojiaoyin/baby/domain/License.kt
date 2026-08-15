@@ -4,7 +4,7 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 data class LicenseInfo(
-    val plan: String,      // "M" 月费 / "L" 永久
+    val plan: String,      // "M" 月费 / "Y" 年度 / "L" 永久
     val expireAt: Long     // 0 表示永久
 )
 
@@ -26,7 +26,7 @@ object License {
 
     fun generateCode(deviceIdBytes: ByteArray, plan: String, expireAt: Long): String {
         require(deviceIdBytes.size == 4) { "deviceId 必须为 4 字节" }
-        require(plan == "M" || plan == "L") { "plan 仅支持 M/L" }
+        require(plan == "M" || plan == "Y" || plan == "L") { "plan 仅支持 M/Y/L" }
         val payload = MAGIC.toByteArray(Charsets.US_ASCII) +
             deviceIdBytes +
             plan.toByteArray(Charsets.US_ASCII) +
@@ -59,7 +59,7 @@ object License {
         if (!codeDevice.contentEquals(deviceIdBytes)) return null
         val plan = payload[6].toInt().toChar().toString()
         val expire = bytesToInt(payload.copyOfRange(7, 11))
-        if (plan == "M" && expire <= System.currentTimeMillis() / 1000) return null
+        if (plan != "L" && expire <= System.currentTimeMillis() / 1000) return null
         return LicenseInfo(
             plan = plan,
             expireAt = if (plan == "L") 0 else expire * 1000L

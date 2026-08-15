@@ -29,6 +29,16 @@ class LicenseTest {
     }
 
     @Test
+    fun `年度激活码带到期时间`() {
+        val expire = System.currentTimeMillis() / 1000 + 365 * 24 * 3600
+        val code = License.generateCode(deviceId, "Y", expire)
+        val info = License.verifyCode(code, deviceId)
+        assertNotNull(info)
+        assertEquals("Y", info!!.plan)
+        assertEquals(expire * 1000, info.expireAt)
+    }
+
+    @Test
     fun `其他设备无法激活`() {
         val code = License.generateCode(deviceId, "L", 0)
         val otherDevice = byteArrayOf(0xAA.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xDD.toByte())
