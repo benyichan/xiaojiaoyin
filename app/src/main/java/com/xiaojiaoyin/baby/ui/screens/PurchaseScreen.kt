@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,12 +28,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
+import com.xiaojiaoyin.baby.R
 import com.xiaojiaoyin.baby.domain.License
 import com.xiaojiaoyin.baby.domain.LicenseManager
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
@@ -120,7 +124,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
             color = TextPrimary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         )
-        StepRow("1", "付款：微信 / 支付宝转账 ¥6.8 或 ¥159（收款方式见付款说明）")
+        StepRow("1", "扫码付款：¥6.8（月）或 ¥159（永久）")
         StepRow("2", "把下方设备 ID 和你的邮箱发给开发者（付款时备注或私信）")
         StepRow("3", "收到激活码后粘贴到下面，点激活")
 
@@ -218,7 +222,24 @@ fun PurchaseScreen(onBack: () -> Unit) {
             )
         }
         Text(
-            "付款说明：请先与开发者确认收款方式（微信/支付宝），付款后把设备 ID 和邮箱发过来，激活码会发到你的邮箱。",
+            "付款收款码",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextSecondary,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+        )
+        Image(
+            painter = painterResource(R.drawable.payment_qr),
+            contentDescription = "微信收款码",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 60.dp)
+                .background(Color.White, RoundedCornerShape(16.dp))
+                .padding(8.dp)
+        )
+        Text(
+            "扫码付款后，把设备 ID 和你的邮箱发给开发者，激活码会发到你的邮箱。",
             fontSize = 11.sp,
             color = TextSecondary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
