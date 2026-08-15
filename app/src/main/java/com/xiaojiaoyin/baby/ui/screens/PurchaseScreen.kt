@@ -140,7 +140,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         )
         StepRow("1", "扫码付款：¥6.8（月）或 ¥159（永久）")
-        StepRow("2", "发邮件到 benyi@aliyun.com，附上设备 ID 和你常用的邮箱")
+        StepRow("2", "发邮件到 benyi@aliyun.com，附上设备 ID、支付凭证截图和你常用的邮箱")
         StepRow("3", "收到回复的激活码后粘贴到下面，点激活")
 
         Column(
@@ -214,7 +214,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
                     .background(Mint, RoundedCornerShape(12.dp))
                     .clickable {
                         val planText = if (selectedPlan == "M") "月度 ¥6.8" else "永久 ¥159"
-                        val content = "小脚印 Pro 激活申请\n设备 ID：$deviceId\n套餐：$planText\n回执邮箱：____（填你的邮箱）\n已付款，请回复激活码，谢谢！"
+                        val content = "小脚印 Pro 激活申请\n设备 ID：$deviceId\n套餐：$planText\n支付凭证：____（请附上付款截图，如微信支付详情页）\n回执邮箱：____（填你的邮箱）\n已付款，请回复激活码，谢谢！"
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         cm.setPrimaryClip(ClipData.newPlainText("licenseApply", content))
                         copied = true
@@ -300,7 +300,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
                 .padding(8.dp)
         )
         Text(
-            "流程：扫码付款 → 把「复制申请内容」粘贴到邮件，发到 benyi@aliyun.com → 收到回复的激活码后输入激活。",
+            "流程：扫码付款（付款后截图保存凭证）→ 把「复制申请内容」粘贴到邮件并附上凭证截图，发到 benyi@aliyun.com → 收到回复的激活码后输入激活。",
             fontSize = 11.sp,
             color = TextSecondary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
