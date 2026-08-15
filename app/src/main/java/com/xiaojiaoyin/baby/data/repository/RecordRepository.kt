@@ -27,7 +27,8 @@ class RecordRepository(private val dao: RecordDao) {
             occurredAt = occurredAt,
             detailJson = detailJson,
             note = note,
-            createdAt = System.currentTimeMillis()
+            createdAt = System.currentTimeMillis(),
+            updatedAt = System.currentTimeMillis()
         )
     )
 
@@ -40,6 +41,10 @@ class RecordRepository(private val dao: RecordDao) {
     suspend fun delete(record: RecordEntity) = dao.delete(record)
 
     suspend fun update(record: RecordEntity) = dao.update(record)
+
+    /** 更新记录时刷新 updatedAt，供同步合并使用 */
+    suspend fun updateWithTimestamp(record: RecordEntity): Unit =
+        dao.update(record.copy(updatedAt = System.currentTimeMillis()))
 
     suspend fun addMedical(
         babyId: Long,

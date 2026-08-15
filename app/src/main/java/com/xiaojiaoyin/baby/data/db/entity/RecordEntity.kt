@@ -15,5 +15,6 @@ data class RecordEntity(
     val occurredAt: Long,
     val detailJson: String,
     val note: String = "",
-    val createdAt: Long
+    val createdAt: Long,
+    val updatedAt: Long = 0
 )

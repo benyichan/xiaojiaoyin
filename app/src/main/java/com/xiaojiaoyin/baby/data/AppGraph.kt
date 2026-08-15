@@ -8,6 +8,7 @@ import com.xiaojiaoyin.baby.data.repository.RecordRepository
 import com.xiaojiaoyin.baby.data.repository.SchoolStageRepository
 import com.xiaojiaoyin.baby.data.repository.TodoRepository
 import com.xiaojiaoyin.baby.data.settings.SettingsRepository
+import com.xiaojiaoyin.baby.data.settings.ProStatusRepository
 
 object AppGraph {
     lateinit var database: AppDatabase
@@ -24,6 +25,8 @@ object AppGraph {
         private set
     lateinit var settingsRepository: SettingsRepository
         private set
+    lateinit var proStatusRepository: ProStatusRepository
+        private set
 
     fun init(context: Context) {
         if (::database.isInitialized) return
@@ -34,5 +37,6 @@ object AppGraph {
         schoolStageRepository = SchoolStageRepository(database.schoolStageDao())
         goodItemRepository = GoodItemRepository(database.goodItemDao())
         settingsRepository = SettingsRepository(context.applicationContext)
+        proStatusRepository = ProStatusRepository(context.applicationContext)
     }
 }

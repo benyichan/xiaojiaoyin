@@ -3,6 +3,7 @@ package com.xiaojiaoyin.baby.data.db.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.xiaojiaoyin.baby.data.db.entity.RecordEntity
@@ -13,6 +14,12 @@ import kotlinx.coroutines.flow.Flow
 interface RecordDao {
     @Insert
     suspend fun insert(record: RecordEntity): Long
+
+    @Query("SELECT * FROM record")
+    suspend fun getAllAll(): List<RecordEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(records: List<RecordEntity>)
 
     @Query("SELECT * FROM record WHERE babyId = :babyId ORDER BY occurredAt DESC LIMIT :limit")
     fun observeRecent(babyId: Long, limit: Int): Flow<List<RecordEntity>>

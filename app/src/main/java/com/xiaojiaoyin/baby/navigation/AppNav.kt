@@ -39,9 +39,11 @@ import com.xiaojiaoyin.baby.ui.screens.MedicalFormScreen
 import com.xiaojiaoyin.baby.ui.screens.MedicalScreen
 import com.xiaojiaoyin.baby.ui.screens.MineScreen
 import com.xiaojiaoyin.baby.ui.screens.NodeFormScreen
+import com.xiaojiaoyin.baby.ui.screens.PurchaseScreen
 import com.xiaojiaoyin.baby.ui.screens.SchoolFormScreen
 import com.xiaojiaoyin.baby.ui.screens.SchoolScreen
 import com.xiaojiaoyin.baby.ui.screens.StatsScreen
+import com.xiaojiaoyin.baby.ui.screens.SyncScreen
 import com.xiaojiaoyin.baby.ui.screens.TodoScreen
 import com.xiaojiaoyin.baby.ui.theme.Bg
 import com.xiaojiaoyin.baby.ui.theme.Mint
@@ -71,6 +73,8 @@ sealed interface Route {
     data object Goods : Route
     data object GoodsForm : Route
     data object Anniv : Route
+    data object Sync : Route
+    data object Purchase : Route
 }
 
 private val TABS = listOf(
@@ -129,7 +133,9 @@ fun AppNav() {
                             onOpenCryingZone = { backStack.add(Route.CryingZone) },
                             onOpenSchool = { backStack.add(Route.School) },
                             onOpenGoods = { backStack.add(Route.Goods) },
-                            onOpenAnniv = { backStack.add(Route.Anniv) }
+                            onOpenAnniv = { backStack.add(Route.Anniv) },
+                            onOpenSync = { backStack.add(Route.Sync) },
+                            onOpenPurchase = { backStack.add(Route.Purchase) }
                         )
                     }
                     Route.EditBaby -> NavEntry(key) { BabyEditScreen(onBack = { backStack.removeLastOrNull() }) }
@@ -174,6 +180,8 @@ fun AppNav() {
                     }
                     Route.GoodsForm -> NavEntry(key) { GoodsFormScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Anniv -> NavEntry(key) { AnnivScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.Sync -> NavEntry(key) { SyncScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.Purchase -> NavEntry(key) { PurchaseScreen(onBack = { backStack.removeLastOrNull() }) }
                     else -> NavEntry(key) { Text("未实现页面") }
                 }
             }

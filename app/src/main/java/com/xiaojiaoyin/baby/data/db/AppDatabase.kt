@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.xiaojiaoyin.baby.data.db.dao.BabyDao
 import com.xiaojiaoyin.baby.data.db.dao.GoodItemDao
 import com.xiaojiaoyin.baby.data.db.dao.RecordDao
@@ -23,7 +25,7 @@ import com.xiaojiaoyin.baby.data.db.entity.TodoEntity
         SchoolStageEntity::class,
         GoodItemEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -46,10 +48,16 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     NAME
                 )
-                    .fallbackToDestructiveMigration()
+                    .addMigrations(MIGRATION_2_3)
                     .build()
                     .also { instance = it }
             }
+
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE record ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT 0")
+            }
+        }
 
         /** 备份恢复专用：关闭并清空单例，供恢复后重启进程使用 */
         fun closeForRestore() {

@@ -10,6 +10,7 @@ datastore = "1.1.7"
 navigation3 = "1.1.0"
 lunar = "1.7.7"
 junit = "4.13.2"
+billing = "9.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +31,7 @@ navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runt
 navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
 lunar = { group = "cn.6tail", name = "lunar", version.ref = "lunar" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+billing = { group = "com.android.billingclient", name = "billing", version.ref = "billing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

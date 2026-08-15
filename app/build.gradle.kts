@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.navigation3.runtime)
     implementation(libs.navigation3.ui)
     implementation(libs.lunar)
+    implementation(libs.billing)
     testImplementation(libs.junit)
     debugImplementation(libs.compose.ui.tooling)
 }

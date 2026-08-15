@@ -31,7 +31,9 @@ fun MineScreen(
     onOpenCryingZone: () -> Unit = {},
     onOpenSchool: () -> Unit = {},
     onOpenGoods: () -> Unit = {},
-    onOpenAnniv: () -> Unit = {}
+    onOpenAnniv: () -> Unit = {},
+    onOpenSync: () -> Unit = {},
+    onOpenPurchase: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -56,9 +58,9 @@ fun MineScreen(
         MenuRow("好物清单", onClick = onOpenGoods)
         MenuRow("那年今日", onClick = onOpenAnniv)
         MenuRow("备份与恢复", onClick = onOpenBackup)
+        MenuRow("共享同步", onClick = onOpenSync)
         MenuRow("提醒设置") {}
-        MenuRow("共享同步") {}
-        MenuRow("订阅升级") {}
+        MenuRow("订阅升级", onClick = onOpenPurchase)
         MenuRow("隐私政策") {}
         MenuRow("关于") {}
     }
