@@ -82,6 +82,7 @@ object SyncJson {
         .put("startAt", s.startAt)
         .put("endAt", s.endAt)
         .put("studentNo", s.studentNo)
+        .put("costYuan", s.costYuan)
         .put("note", s.note)
         .put("createdAt", s.createdAt)
         .toString()
@@ -96,6 +97,7 @@ object SyncJson {
         startAt = o.optString("startAt"),
         endAt = o.optString("endAt"),
         studentNo = o.optString("studentNo"),
+        costYuan = o.optDouble("costYuan", 0.0),
         note = o.optString("note"),
         createdAt = o.optLong("createdAt")
     )
@@ -104,8 +106,11 @@ object SyncJson {
         .put("id", g.id)
         .put("babyId", g.babyId)
         .put("name", g.name)
+        .put("category", g.category)
+        .put("priceYuan", g.priceYuan)
         .put("rating", g.rating)
         .put("note", g.note)
+        .put("buyDate", g.buyDate)
         .put("createdAt", g.createdAt)
         .toString()
 
@@ -113,8 +118,11 @@ object SyncJson {
         id = o.optLong("id"),
         babyId = o.optLong("babyId"),
         name = o.optString("name"),
+        category = o.optString("category", "其他"),
+        priceYuan = o.optDouble("priceYuan", 0.0),
         rating = o.optInt("rating"),
         note = o.optString("note"),
+        buyDate = o.optLong("buyDate"),
         createdAt = o.optLong("createdAt")
     )
 }

@@ -41,6 +41,7 @@ fun SchoolFormScreen(onBack: () -> Unit) {
     var startAt by remember { mutableStateOf("") }
     var endAt by remember { mutableStateOf("") }
     var studentNo by remember { mutableStateOf("") }
+    var costYuan by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     val types = listOf("幼儿园", "小学", "初中", "高中", "大学", "其他")
@@ -65,6 +66,7 @@ fun SchoolFormScreen(onBack: () -> Unit) {
         TextInputField("入学时间", startAt, onValueChange = { startAt = it }, placeholder = "如 2029-09")
         TextInputField("毕业时间", endAt, onValueChange = { endAt = it }, placeholder = "如 2030-06")
         TextInputField("学号", studentNo, onValueChange = { studentNo = it }, placeholder = "选填")
+        TextInputField("学费 / 年（元）", costYuan, onValueChange = { costYuan = it }, placeholder = "如 8000（选填）")
         TextInputField("备注", note, onValueChange = { note = it }, placeholder = "校车、接送人等")
         error?.let {
             Text(it, fontSize = 12.sp, color = Color(0xFFD96A6A), modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
@@ -91,6 +93,7 @@ fun SchoolFormScreen(onBack: () -> Unit) {
                                 startAt = startAt.trim(),
                                 endAt = endAt.trim(),
                                 studentNo = studentNo.trim(),
+                                costYuan = costYuan.toDoubleOrNull() ?: 0.0,
                                 note = note.trim()
                             )
                         }

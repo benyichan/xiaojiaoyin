@@ -25,7 +25,7 @@ import com.xiaojiaoyin.baby.data.db.entity.TodoEntity
         SchoolStageEntity::class,
         GoodItemEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -48,7 +48,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     NAME
                 )
-                    .addMigrations(MIGRATION_2_3)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                     .also { instance = it }
             }
@@ -56,6 +56,15 @@ abstract class AppDatabase : RoomDatabase() {
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE record ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE good_item ADD COLUMN category TEXT NOT NULL DEFAULT '其他'")
+                db.execSQL("ALTER TABLE good_item ADD COLUMN priceYuan REAL NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE good_item ADD COLUMN buyDate INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE school_stage ADD COLUMN costYuan REAL NOT NULL DEFAULT 0")
             }
         }
 

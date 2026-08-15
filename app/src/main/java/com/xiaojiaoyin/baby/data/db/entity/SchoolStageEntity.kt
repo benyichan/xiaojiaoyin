@@ -14,6 +14,7 @@ data class SchoolStageEntity(
     val startAt: String,        // "2029-09"
     val endAt: String,
     val studentNo: String,
+    val costYuan: Double = 0.0,
     val note: String,
     val createdAt: Long
 )

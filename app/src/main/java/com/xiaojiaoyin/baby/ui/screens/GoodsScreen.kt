@@ -39,6 +39,9 @@ import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit) {
@@ -60,6 +63,15 @@ fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit) {
             .statusBarsPadding()
     ) {
         OverlayHeader("好物清单", onBack)
+        if (items.isNotEmpty()) {
+            Text(
+                "共 ${items.size} 件 · 总花费 ¥%.2f".format(items.sumOf { it.priceYuan }),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,6 +114,18 @@ fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit) {
                                 .padding(end = 10.dp)
                         ) {
                             Text(item.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Row(modifier = Modifier.padding(top = 2.dp)) {
+                                Text(item.category, fontSize = 10.sp, color = TextSecondary)
+                                if (item.priceYuan > 0) {
+                                    Text(
+                                        "¥%.2f".format(item.priceYuan),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextPrimary,
+                                        modifier = Modifier.padding(start = 8.dp)
+                                    )
+                                }
+                            }
                             if (item.note.isNotBlank()) {
                                 Text(item.note, fontSize = 11.sp, color = TextSecondary, modifier = Modifier.padding(top = 2.dp))
                             }
@@ -120,6 +144,18 @@ fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit) {
             title = { Text(preview.name, fontSize = 16.sp, fontWeight = FontWeight.Bold) },
             text = {
                 Column {
+                    if (preview.priceYuan > 0) {
+                        Text("价格：¥%.2f".format(preview.priceYuan), fontSize = 13.sp, color = TextPrimary)
+                    }
+                    Text("分类：${preview.category}", fontSize = 12.sp, color = TextSecondary, modifier = Modifier.padding(top = 4.dp))
+                    if (preview.buyDate > 0) {
+                        Text(
+                            "购买日期：${formatGoodDate(preview.buyDate)}",
+                            fontSize = 12.sp,
+                            color = TextSecondary,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
                     Text("评分：${"★".repeat(preview.rating)}", fontSize = 13.sp, color = Gold)
                     if (preview.note.isNotBlank()) {
                         Text(preview.note, fontSize = 12.sp, color = TextSecondary, modifier = Modifier.padding(top = 6.dp))
@@ -137,4 +173,9 @@ fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit) {
             }
         )
     }
+}
+
+private fun formatGoodDate(millis: Long): String {
+    val t = Instant.ofEpochMilli(millis).atZone(ZoneId.of("Asia/Shanghai"))
+    return t.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 }

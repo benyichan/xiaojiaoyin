@@ -7,13 +7,24 @@ import kotlinx.coroutines.flow.Flow
 class GoodItemRepository(private val dao: GoodItemDao) {
     fun observeAll(babyId: Long): Flow<List<GoodItemEntity>> = dao.observeAll(babyId)
 
-    suspend fun add(babyId: Long, name: String, rating: Int, note: String): Long =
+    suspend fun add(
+        babyId: Long,
+        name: String,
+        category: String,
+        priceYuan: Double,
+        rating: Int,
+        note: String,
+        buyDate: Long
+    ): Long =
         dao.insert(
             GoodItemEntity(
                 babyId = babyId,
                 name = name,
+                category = category,
+                priceYuan = priceYuan,
                 rating = rating,
                 note = note,
+                buyDate = buyDate,
                 createdAt = System.currentTimeMillis()
             )
         )

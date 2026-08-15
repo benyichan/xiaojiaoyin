@@ -119,6 +119,14 @@ fun SchoolScreen(onBack: () -> Unit, onAdd: () -> Unit) {
                                 color = TextSecondary,
                                 modifier = Modifier.padding(top = 2.dp)
                             )
+                            if (s.costYuan > 0) {
+                                Text(
+                                    "学费 ¥%.2f / 年".format(s.costYuan),
+                                    fontSize = 11.sp,
+                                    color = TextPrimary,
+                                    modifier = Modifier.padding(top = 2.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -138,6 +146,14 @@ fun SchoolScreen(onBack: () -> Unit, onAdd: () -> Unit) {
                     Text("${preview.startAt} - ${preview.endAt}", fontSize = 12.sp, color = TextSecondary, modifier = Modifier.padding(top = 4.dp))
                     if (preview.studentNo.isNotBlank()) {
                         Text("学号：${preview.studentNo}", fontSize = 12.sp, color = TextSecondary, modifier = Modifier.padding(top = 4.dp))
+                    }
+                    if (preview.costYuan > 0) {
+                        Text(
+                            "学费 ¥%.2f / 年".format(preview.costYuan),
+                            fontSize = 12.sp,
+                            color = TextPrimary,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
                     }
                     if (preview.note.isNotBlank()) {
                         Text(preview.note, fontSize = 12.sp, color = TextSecondary, modifier = Modifier.padding(top = 4.dp))

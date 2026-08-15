@@ -47,6 +47,7 @@ fun MedicalFormScreen(onBack: () -> Unit) {
     var categoryIndex by remember { mutableStateOf(0) }
     var title by remember { mutableStateOf("") }
     var detail by remember { mutableStateOf("") }
+    var cost by remember { mutableStateOf("") }
     var dateAt by remember { mutableStateOf(System.currentTimeMillis()) }
     var showDate by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -85,6 +86,12 @@ fun MedicalFormScreen(onBack: () -> Unit) {
             onValueChange = { detail = it },
             placeholder = "医生建议、用药量等"
         )
+        TextInputField(
+            label = "费用（元）",
+            value = cost,
+            onValueChange = { cost = it },
+            placeholder = "如 120（选填）"
+        )
         error?.let {
             Text(it, fontSize = 12.sp, color = Color(0xFFD96A6A), modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
         }
@@ -106,6 +113,7 @@ fun MedicalFormScreen(onBack: () -> Unit) {
                                 category = categories[categoryIndex],
                                 title = title.trim(),
                                 detail = detail.trim(),
+                                costYuan = cost.toDoubleOrNull() ?: 0.0,
                                 occurredAt = dateAt
                             )
                         }

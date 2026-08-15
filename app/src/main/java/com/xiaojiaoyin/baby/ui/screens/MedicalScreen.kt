@@ -127,7 +127,7 @@ fun MedicalScreen(onBack: () -> Unit, onAdd: () -> Unit) {
             title = { Text(preview.medicalTitle(), fontSize = 16.sp, fontWeight = FontWeight.Bold) },
             text = {
                 Column {
-                    Text("分类：${preview.category()}", fontSize = 12.sp, color = TextSecondary)
+            Text("分类：${preview.category()}", fontSize = 12.sp, color = TextSecondary)
                     Text(
                         formatDateTime(preview.occurredAt),
                         fontSize = 12.sp,
@@ -140,6 +140,14 @@ fun MedicalScreen(onBack: () -> Unit, onAdd: () -> Unit) {
                             fontSize = 13.sp,
                             color = TextPrimary,
                             modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                    if (preview.medicalCost() > 0) {
+                        Text(
+                            "费用：¥%.2f".format(preview.medicalCost()),
+                            fontSize = 12.sp,
+                            color = TextPrimary,
+                            modifier = Modifier.padding(top = 4.dp)
                         )
                     }
                 }
@@ -224,6 +232,14 @@ private fun MedicalRow(record: RecordEntity, onClick: () -> Unit) {
                 color = TextSecondary,
                 modifier = Modifier.padding(top = 2.dp)
             )
+            if (record.medicalCost() > 0) {
+                Text(
+                    "费用 ¥%.2f".format(record.medicalCost()),
+                    fontSize = 11.sp,
+                    color = TextPrimary,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
         }
     }
 }
@@ -236,6 +252,9 @@ private fun RecordEntity.medicalTitle(): String =
 
 private fun RecordEntity.medicalDetail(): String =
     runCatching { JSONObject(detailJson).optString("detail", "") }.getOrDefault("")
+
+private fun RecordEntity.medicalCost(): Double =
+    runCatching { JSONObject(detailJson).optDouble("costYuan", 0.0) }.getOrDefault(0.0)
 
 private fun formatDateTime(millis: Long): String {
     val t = Instant.ofEpochMilli(millis).atZone(ZoneId.of("Asia/Shanghai"))

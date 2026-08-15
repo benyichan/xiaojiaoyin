@@ -16,6 +16,7 @@ class SchoolStageRepository(private val dao: SchoolStageDao) {
         startAt: String,
         endAt: String,
         studentNo: String,
+        costYuan: Double,
         note: String
     ): Long = dao.insert(
         SchoolStageEntity(
@@ -27,6 +28,7 @@ class SchoolStageRepository(private val dao: SchoolStageDao) {
             startAt = startAt,
             endAt = endAt,
             studentNo = studentNo,
+            costYuan = costYuan,
             note = note,
             createdAt = System.currentTimeMillis()
         )

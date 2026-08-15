@@ -51,6 +51,7 @@ class RecordRepository(private val dao: RecordDao) {
         category: String,
         title: String,
         detail: String,
+        costYuan: Double,
         occurredAt: Long
     ): Long = add(
         babyId = babyId,
@@ -60,6 +61,7 @@ class RecordRepository(private val dao: RecordDao) {
             .put("category", category)
             .put("title", title)
             .put("detail", detail)
+            .put("costYuan", costYuan)
             .toString()
     )
 }
