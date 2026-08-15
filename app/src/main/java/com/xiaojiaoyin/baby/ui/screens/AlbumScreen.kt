@@ -51,6 +51,7 @@ import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
+import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -69,13 +70,13 @@ fun AlbumScreen(onUpgrade: () -> Unit) {
     var query by remember { mutableStateOf("") }
     var previewId by remember { mutableStateOf<Long?>(null) }
     var showUpgrade by remember { mutableStateOf(false) }
-    val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
+    val unlocked by rememberProUnlocked()
     val FREE_PHOTO_LIMIT = 30
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             scope.launch {
-                if (!isPro && photos.size >= FREE_PHOTO_LIMIT) {
+                if (!unlocked && photos.size >= FREE_PHOTO_LIMIT) {
                     showUpgrade = true
                 } else {
                     val path = PhotoStorage.saveImage(context, uri)

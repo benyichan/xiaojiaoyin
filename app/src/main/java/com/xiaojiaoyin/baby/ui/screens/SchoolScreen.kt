@@ -31,6 +31,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.data.db.entity.SchoolStageEntity
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
+import com.xiaojiaoyin.baby.ui.components.ProLockedView
+import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import com.xiaojiaoyin.baby.ui.theme.Blue
 import com.xiaojiaoyin.baby.ui.theme.BlueLight
 import com.xiaojiaoyin.baby.ui.theme.Card
@@ -46,7 +48,16 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 @Composable
-fun SchoolScreen(onBack: () -> Unit, onAdd: () -> Unit) {
+fun SchoolScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) {
+    val unlocked by rememberProUnlocked()
+    if (!unlocked) {
+        ProLockedView(
+            title = "学籍信息",
+            desc = "幼儿园到大学的学习生涯记录是 Pro 专属功能",
+            onUpgrade = onUpgrade
+        )
+        return
+    }
     val scope = rememberCoroutineScope()
     val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val stages by remember(babyId) {

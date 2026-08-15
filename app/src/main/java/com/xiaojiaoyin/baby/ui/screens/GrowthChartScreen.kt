@@ -35,6 +35,7 @@ import com.xiaojiaoyin.baby.ui.components.LineChart
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
 import com.xiaojiaoyin.baby.ui.components.SegmentedField
 import com.xiaojiaoyin.baby.ui.components.ProLockedView
+import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import com.xiaojiaoyin.baby.ui.theme.Blue
 import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Gold
@@ -48,8 +49,8 @@ import java.time.ZoneId
 
 @Composable
 fun GrowthChartScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
-    val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
-    if (!isPro) {
+    val unlocked by rememberProUnlocked()
+    if (!unlocked) {
         ProLockedView(
             title = "生长曲线",
             desc = "身高 / 体重对照 WHO 标准是 Pro 专属功能",

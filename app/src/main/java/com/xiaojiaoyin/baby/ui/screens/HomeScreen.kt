@@ -25,6 +25,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,6 +60,8 @@ import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import com.xiaojiaoyin.baby.ui.viewmodel.HomeViewModel
 import com.xiaojiaoyin.baby.data.settings.ProStatusRepository
+import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -84,15 +87,30 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
+    val unlocked by rememberProUnlocked()
     val photoCount by AppGraph.recordRepository
         .observeByType(state.currentBaby?.id ?: -1, RecordType.PHOTO)
         .collectAsStateWithLifecycle(initialValue = emptyList())
     var showUpgrade by remember { mutableStateOf(false) }
+    var showTrialEnded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        val isPro = AppGraph.proStatusRepository.isPro.first()
+        val trialStart = AppGraph.proStatusRepository.trialStartAt.first()
+        val reminderShown = AppGraph.proStatusRepository.trialReminderShown.first()
+        val trialEnded = trialStart > 0 &&
+            System.currentTimeMillis() >=
+            trialStart + ProStatusRepository.TRIAL_DAYS * ProStatusRepository.DAY_MS
+        if (!isPro && trialEnded && !reminderShown) {
+            AppGraph.proStatusRepository.setTrialReminderShown()
+            showTrialEnded = true
+        }
+    }
 
     val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             scope.launch {
-                if (!isPro && photoCount.size >= FREE_PHOTO_LIMIT) {
+                if (!unlocked && photoCount.size >= FREE_PHOTO_LIMIT) {
                     showUpgrade = true
                 } else {
                     val path = PhotoStorage.saveImage(context, uri)
@@ -156,7 +174,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        if (!isPro && state.babies.size >= 1) {
+                        if (!unlocked && state.babies.size >= 1) {
                             showUpgrade = true
                             showBabyPicker = false
                         } else {
@@ -205,6 +223,23 @@ fun HomeScreen(
         )
     }
 
+    if (showTrialEnded) {
+        AlertDialog(
+            onDismissRequest = { showTrialEnded = false },
+            title = { Text("免费试用已结束", fontWeight = FontWeight.Bold) },
+            text = { Text("7 天试用期已过，升级 Pro 解锁多宝宝、生长曲线、统计、同步等全部功能。") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    showTrialEnded = false
+                    onUpgrade()
+                }) { Text("去升级", color = Mint) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showTrialEnded = false }) { Text("暂不") }
+            }
+        )
+    }
+
     if (state.currentBaby == null) {
         EmptyHome(onAdd = { onEdit(0) })
         return
@@ -232,6 +267,7 @@ fun HomeScreen(
                 baby = state.currentBaby!!,
                 derivedText = state.derived,
                 isPro = isPro,
+                unlocked = unlocked,
                 onEdit = { onEdit(state.currentBaby!!.id) }
             )
         }
@@ -301,6 +337,7 @@ private fun InfoCard(
     baby: BabyEntity,
     derivedText: com.xiaojiaoyin.baby.domain.DerivedInfo?,
     isPro: Boolean,
+    unlocked: Boolean,
     onEdit: (Long) -> Unit
 ) {
     val d = derivedText
@@ -312,13 +349,30 @@ private fun InfoCard(
             .padding(16.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
+            val label = when {
+                isPro -> "Pro 会员"
+                unlocked -> "试用中"
+                else -> "免费版"
+            }
+            val labelColor = when {
+                isPro -> Gold
+                unlocked -> Mint
+                else -> TextSecondary
+            }
             Text(
-                text = if (isPro) "Pro 会员" else "免费版",
+                text = label,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isPro) Gold else TextSecondary,
+                color = labelColor,
                 modifier = Modifier
-                    .background(if (isPro) GoldLight else androidx.compose.ui.graphics.Color(0xFFF0F0EC), RoundedCornerShape(9.dp))
+                    .background(
+                        when {
+                            isPro -> GoldLight
+                            unlocked -> MintLight
+                            else -> androidx.compose.ui.graphics.Color(0xFFF0F0EC)
+                        },
+                        RoundedCornerShape(9.dp)
+                    )
                     .padding(horizontal = 8.dp, vertical = 3.dp)
             )
             Text(

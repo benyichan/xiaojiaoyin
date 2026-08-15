@@ -32,6 +32,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.data.db.entity.GoodItemEntity
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
+import com.xiaojiaoyin.baby.ui.components.ProLockedView
+import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Gold
 import com.xiaojiaoyin.baby.ui.theme.Mint
@@ -44,7 +46,16 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit) {
+fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) {
+    val unlocked by rememberProUnlocked()
+    if (!unlocked) {
+        ProLockedView(
+            title = "好物清单",
+            desc = "记录用过的带娃好物是 Pro 专属功能",
+            onUpgrade = onUpgrade
+        )
+        return
+    }
     val scope = rememberCoroutineScope()
     val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val items by remember(babyId) {

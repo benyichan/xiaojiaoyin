@@ -37,6 +37,7 @@ import com.xiaojiaoyin.baby.sync.SyncMerger
 import com.xiaojiaoyin.baby.sync.SyncNetwork
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
 import com.xiaojiaoyin.baby.ui.components.ProLockedView
+import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
@@ -45,8 +46,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
-    val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
-    if (!isPro) {
+    val unlocked by rememberProUnlocked()
+    if (!unlocked) {
         ProLockedView(
             title = "多设备离线共享",
             desc = "两台手机同步是 Pro 专属功能",

@@ -175,7 +175,8 @@ fun AppNav() {
                     Route.Medical -> NavEntry(key) {
                         MedicalScreen(
                             onBack = { backStack.removeLastOrNull() },
-                            onAdd = { backStack.add(Route.MedicalForm) }
+                            onAdd = { backStack.add(Route.MedicalForm) },
+                            onUpgrade = { backStack.add(Route.Purchase) }
                         )
                     }
                     Route.MedicalForm -> NavEntry(key) { MedicalFormScreen(onBack = { backStack.removeLastOrNull() }) }
@@ -194,18 +195,25 @@ fun AppNav() {
                     Route.School -> NavEntry(key) {
                         SchoolScreen(
                             onBack = { backStack.removeLastOrNull() },
-                            onAdd = { backStack.add(Route.SchoolForm) }
+                            onAdd = { backStack.add(Route.SchoolForm) },
+                            onUpgrade = { backStack.add(Route.Purchase) }
                         )
                     }
                     Route.SchoolForm -> NavEntry(key) { SchoolFormScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Goods -> NavEntry(key) {
                         GoodsScreen(
                             onBack = { backStack.removeLastOrNull() },
-                            onAdd = { backStack.add(Route.GoodsForm) }
+                            onAdd = { backStack.add(Route.GoodsForm) },
+                            onUpgrade = { backStack.add(Route.Purchase) }
                         )
                     }
                     Route.GoodsForm -> NavEntry(key) { GoodsFormScreen(onBack = { backStack.removeLastOrNull() }) }
-                    Route.Anniv -> NavEntry(key) { AnnivScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.Anniv -> NavEntry(key) {
+                        AnnivScreen(
+                            onBack = { backStack.removeLastOrNull() },
+                            onUpgrade = { backStack.add(Route.Purchase) }
+                        )
+                    }
                     Route.Sync -> NavEntry(key) {
                         SyncScreen(
                             onBack = { backStack.removeLastOrNull() },

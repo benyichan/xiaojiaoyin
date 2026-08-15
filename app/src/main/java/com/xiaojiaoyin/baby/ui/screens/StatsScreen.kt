@@ -41,6 +41,7 @@ import com.xiaojiaoyin.baby.ui.theme.Pink
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import com.xiaojiaoyin.baby.ui.components.ProLockedView
+import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import kotlinx.coroutines.flow.flowOf
 import org.json.JSONObject
 import java.time.Instant
@@ -49,8 +50,8 @@ import java.time.temporal.ChronoUnit
 
 @Composable
 fun StatsScreen(onOpenChart: () -> Unit, onUpgrade: () -> Unit) {
-    val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
-    if (!isPro) {
+    val unlocked by rememberProUnlocked()
+    if (!unlocked) {
         ProLockedView(
             title = "数据看板",
             desc = "生长曲线、喂养统计、哭闹分布是 Pro 专属功能",

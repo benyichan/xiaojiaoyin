@@ -25,6 +25,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.data.db.entity.RecordEntity
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
+import com.xiaojiaoyin.baby.ui.components.ProLockedView
+import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import com.xiaojiaoyin.baby.ui.components.TagKind
 import com.xiaojiaoyin.baby.ui.components.TypeTag
 import com.xiaojiaoyin.baby.ui.theme.Card
@@ -36,7 +38,16 @@ import java.time.Instant
 import java.time.ZoneId
 
 @Composable
-fun AnnivScreen(onBack: () -> Unit) {
+fun AnnivScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
+    val unlocked by rememberProUnlocked()
+    if (!unlocked) {
+        ProLockedView(
+            title = "那年今日",
+            desc = "回顾往年今天的成长记忆是 Pro 专属功能",
+            onUpgrade = onUpgrade
+        )
+        return
+    }
     val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val records by remember(babyId) {
         if (babyId == null) flowOf(emptyList<RecordEntity>())

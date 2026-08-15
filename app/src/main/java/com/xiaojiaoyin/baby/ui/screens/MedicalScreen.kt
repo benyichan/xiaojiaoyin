@@ -33,6 +33,8 @@ import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.data.db.entity.RecordEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordType
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
+import com.xiaojiaoyin.baby.ui.components.ProLockedView
+import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import com.xiaojiaoyin.baby.ui.theme.Blue
 import com.xiaojiaoyin.baby.ui.theme.BlueLight
 import com.xiaojiaoyin.baby.ui.theme.Card
@@ -53,7 +55,16 @@ import java.time.ZoneId
 private val MEDICAL_CATEGORIES = listOf("疫苗", "体检", "就诊", "用药")
 
 @Composable
-fun MedicalScreen(onBack: () -> Unit, onAdd: () -> Unit) {
+fun MedicalScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) {
+    val unlocked by rememberProUnlocked()
+    if (!unlocked) {
+        ProLockedView(
+            title = "医疗记录",
+            desc = "疫苗、体检、就诊、用药记录是 Pro 专属功能",
+            onUpgrade = onUpgrade
+        )
+        return
+    }
     val scope = rememberCoroutineScope()
     val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val records by remember(babyId) {

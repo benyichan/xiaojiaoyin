@@ -26,6 +26,8 @@ import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.ui.theme.Gold
+import com.xiaojiaoyin.baby.ui.theme.Mint
+import com.xiaojiaoyin.baby.data.settings.ProStatusRepository
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -49,6 +51,11 @@ fun MineScreen(
 ) {
     val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
     val expireAt by AppGraph.proStatusRepository.proExpireAt.collectAsStateWithLifecycle(initialValue = 0L)
+    val trialStartAt by AppGraph.proStatusRepository.trialStartAt.collectAsStateWithLifecycle(initialValue = 0L)
+    val trialRemaining = if (trialStartAt > 0) {
+        ((trialStartAt + ProStatusRepository.TRIAL_DAYS * ProStatusRepository.DAY_MS - System.currentTimeMillis())
+            / ProStatusRepository.DAY_MS).coerceAtLeast(0)
+    } else 0L
 
     Column(
         modifier = Modifier
@@ -67,6 +74,7 @@ fun MineScreen(
         MembershipCard(
             isPro = isPro,
             expireAt = expireAt,
+            trialRemaining = trialRemaining,
             onUpgrade = onOpenPurchase
         )
         MenuRow("宝宝管理", onClick = onOpenBabyManage)
@@ -87,7 +95,12 @@ fun MineScreen(
 }
 
 @Composable
-private fun MembershipCard(isPro: Boolean, expireAt: Long, onUpgrade: () -> Unit) {
+private fun MembershipCard(
+    isPro: Boolean,
+    expireAt: Long,
+    trialRemaining: Long,
+    onUpgrade: () -> Unit
+) {
     if (isPro) {
         Row(
             modifier = Modifier
@@ -105,6 +118,28 @@ private fun MembershipCard(isPro: Boolean, expireAt: Long, onUpgrade: () -> Unit
             )
             Text(
                 if (expireAt == 0L) "永久" else "有效期至 ${formatMemberExpire(expireAt)}",
+                fontSize = 12.sp,
+                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.padding(start = 10.dp)
+            )
+        }
+    } else if (trialRemaining > 0) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .background(Mint, RoundedCornerShape(18.dp))
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Pro 试用中",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = androidx.compose.ui.graphics.Color.White
+            )
+            Text(
+                "剩余 $trialRemaining 天",
                 fontSize = 12.sp,
                 color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f),
                 modifier = Modifier.padding(start = 10.dp)

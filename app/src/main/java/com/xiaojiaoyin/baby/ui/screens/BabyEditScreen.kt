@@ -49,6 +49,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
+import com.xiaojiaoyin.baby.data.settings.ProStatusRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -163,7 +164,13 @@ fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
                         } else {
                             val existing = AppGraph.babyRepository.getAll()
                             val isPro = AppGraph.proStatusRepository.isPro.first()
-                            if (existing.isNotEmpty() && !isPro) {
+                            val trialStart = AppGraph.proStatusRepository.trialStartAt.first()
+                            val unlocked = isPro || (
+                                trialStart > 0 &&
+                                    System.currentTimeMillis() <
+                                    trialStart + ProStatusRepository.TRIAL_DAYS * ProStatusRepository.DAY_MS
+                                )
+                            if (existing.isNotEmpty() && !unlocked) {
                                 error = "免费版只能记录一个宝宝，升级 Pro 可添加多个"
                                 return@launch
                             }

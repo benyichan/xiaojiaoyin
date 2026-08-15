@@ -5,6 +5,9 @@ import android.content.ContentValues
 import android.os.Environment
 import android.provider.MediaStore
 import com.xiaojiaoyin.baby.data.AppGraph
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.Date
@@ -14,6 +17,9 @@ class BabyApp : Application() {
         super.onCreate()
         AppGraph.init(this)
         installCrashLogger()
+        CoroutineScope(Dispatchers.IO).launch {
+            AppGraph.proStatusRepository.ensureTrialStarted()
+        }
     }
 
     /** 捕获崩溃并把堆栈写到「下载」文件夹，便于真机排查 */

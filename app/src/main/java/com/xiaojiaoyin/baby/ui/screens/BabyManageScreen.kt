@@ -33,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.data.db.entity.BabyEntity
 import com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId
+import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
 import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Gold
@@ -54,7 +55,7 @@ fun BabyManageScreen(
     val babies by AppGraph.babyRepository.observeAll()
         .collectAsStateWithLifecycle(initialValue = emptyList())
     val currentBabyId by rememberCurrentBabyId()
-    val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
+    val unlocked by rememberProUnlocked()
     var deleteTarget by remember { mutableStateOf<BabyEntity?>(null) }
     var showUpgrade by remember { mutableStateOf(false) }
 
@@ -76,7 +77,7 @@ fun BabyManageScreen(
                 .padding(horizontal = 16.dp, vertical = 6.dp)
                 .background(Mint, RoundedCornerShape(14.dp))
                 .clickable {
-                    if (!isPro && babies.size >= 1) showUpgrade = true else onAdd()
+                    if (!unlocked && babies.size >= 1) showUpgrade = true else onAdd()
                 }
                 .padding(vertical = 12.dp),
             contentAlignment = Alignment.Center
