@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -68,7 +70,11 @@ fun AppNav() {
         backStack.add(route)
     }
 
-    Box {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Bg)
+    ) {
         NavDisplay(
             backStack = backStack,
             onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
@@ -124,6 +130,7 @@ private fun BottomTabBar(current: Route?, onSelect: (Route) -> Unit, modifier: M
     Row(
         modifier = modifier
             .background(androidx.compose.ui.graphics.Color.White, RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
+            .navigationBarsPadding()
             .padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
