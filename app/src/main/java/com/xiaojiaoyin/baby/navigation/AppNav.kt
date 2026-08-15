@@ -22,16 +22,25 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.xiaojiaoyin.baby.ui.screens.AlbumScreen
+import com.xiaojiaoyin.baby.ui.screens.AnnivScreen
 import com.xiaojiaoyin.baby.ui.screens.BackupScreen
 import com.xiaojiaoyin.baby.ui.screens.BabyEditScreen
+import com.xiaojiaoyin.baby.ui.screens.CryingZoneScreen
 import com.xiaojiaoyin.baby.ui.screens.CryingFormScreen
+import com.xiaojiaoyin.baby.ui.screens.FeedingZoneScreen
 import com.xiaojiaoyin.baby.ui.screens.FeedingFormScreen
+import com.xiaojiaoyin.baby.ui.screens.GoodsFormScreen
+import com.xiaojiaoyin.baby.ui.screens.GoodsScreen
 import com.xiaojiaoyin.baby.ui.screens.GrowthFormScreen
 import com.xiaojiaoyin.baby.ui.screens.GrowthChartScreen
 import com.xiaojiaoyin.baby.ui.screens.GrowthScreen
 import com.xiaojiaoyin.baby.ui.screens.HomeScreen
+import com.xiaojiaoyin.baby.ui.screens.MedicalFormScreen
+import com.xiaojiaoyin.baby.ui.screens.MedicalScreen
 import com.xiaojiaoyin.baby.ui.screens.MineScreen
 import com.xiaojiaoyin.baby.ui.screens.NodeFormScreen
+import com.xiaojiaoyin.baby.ui.screens.SchoolFormScreen
+import com.xiaojiaoyin.baby.ui.screens.SchoolScreen
 import com.xiaojiaoyin.baby.ui.screens.StatsScreen
 import com.xiaojiaoyin.baby.ui.screens.TodoScreen
 import com.xiaojiaoyin.baby.ui.theme.Bg
@@ -53,6 +62,15 @@ sealed interface Route {
     data object Backup : Route
     data object NodeForm : Route
     data object GrowthChart : Route
+    data object Medical : Route
+    data object MedicalForm : Route
+    data object FeedingZone : Route
+    data object CryingZone : Route
+    data object School : Route
+    data object SchoolForm : Route
+    data object Goods : Route
+    data object GoodsForm : Route
+    data object Anniv : Route
 }
 
 private val TABS = listOf(
@@ -105,7 +123,13 @@ fun AppNav() {
                     Route.Mine -> NavEntry(key) {
                         MineScreen(
                             onOpenTodo = { backStack.add(Route.Todo) },
-                            onOpenBackup = { backStack.add(Route.Backup) }
+                            onOpenBackup = { backStack.add(Route.Backup) },
+                            onOpenMedical = { backStack.add(Route.Medical) },
+                            onOpenFeedingZone = { backStack.add(Route.FeedingZone) },
+                            onOpenCryingZone = { backStack.add(Route.CryingZone) },
+                            onOpenSchool = { backStack.add(Route.School) },
+                            onOpenGoods = { backStack.add(Route.Goods) },
+                            onOpenAnniv = { backStack.add(Route.Anniv) }
                         )
                     }
                     Route.EditBaby -> NavEntry(key) { BabyEditScreen(onBack = { backStack.removeLastOrNull() }) }
@@ -116,6 +140,40 @@ fun AppNav() {
                     Route.Backup -> NavEntry(key) { BackupScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.NodeForm -> NavEntry(key) { NodeFormScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.GrowthChart -> NavEntry(key) { GrowthChartScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.Medical -> NavEntry(key) {
+                        MedicalScreen(
+                            onBack = { backStack.removeLastOrNull() },
+                            onAdd = { backStack.add(Route.MedicalForm) }
+                        )
+                    }
+                    Route.MedicalForm -> NavEntry(key) { MedicalFormScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.FeedingZone -> NavEntry(key) {
+                        FeedingZoneScreen(
+                            onBack = { backStack.removeLastOrNull() },
+                            onAdd = { backStack.add(Route.Feeding) }
+                        )
+                    }
+                    Route.CryingZone -> NavEntry(key) {
+                        CryingZoneScreen(
+                            onBack = { backStack.removeLastOrNull() },
+                            onAdd = { backStack.add(Route.Crying) }
+                        )
+                    }
+                    Route.School -> NavEntry(key) {
+                        SchoolScreen(
+                            onBack = { backStack.removeLastOrNull() },
+                            onAdd = { backStack.add(Route.SchoolForm) }
+                        )
+                    }
+                    Route.SchoolForm -> NavEntry(key) { SchoolFormScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.Goods -> NavEntry(key) {
+                        GoodsScreen(
+                            onBack = { backStack.removeLastOrNull() },
+                            onAdd = { backStack.add(Route.GoodsForm) }
+                        )
+                    }
+                    Route.GoodsForm -> NavEntry(key) { GoodsFormScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.Anniv -> NavEntry(key) { AnnivScreen(onBack = { backStack.removeLastOrNull() }) }
                     else -> NavEntry(key) { Text("未实现页面") }
                 }
             }

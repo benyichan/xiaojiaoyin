@@ -442,6 +442,17 @@ private fun FeedCard(record: com.xiaojiaoyin.baby.data.db.entity.RecordEntity) {
                 sub = formatTime(record.occurredAt)
             )
         }
+        RecordType.MEDICAL -> {
+            val detail = runCatching { org.json.JSONObject(record.detailJson) }.getOrNull()
+            val category = detail?.optString("category", "医疗") ?: "医疗"
+            val title = detail?.optString("title", "医疗记录") ?: "医疗记录"
+            FeedUi(
+                kind = TagKind.NODE,
+                tagText = category,
+                title = title,
+                sub = formatTime(record.occurredAt)
+            )
+        }
     }
     Row(
         modifier = Modifier

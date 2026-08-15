@@ -1,0 +1,24 @@
+package com.xiaojiaoyin.baby.data.db.dao
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
+import com.xiaojiaoyin.baby.data.db.entity.GoodItemEntity
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface GoodItemDao {
+    @Query("SELECT * FROM good_item WHERE babyId = :babyId ORDER BY createdAt DESC")
+    fun observeAll(babyId: Long): Flow<List<GoodItemEntity>>
+
+    @Insert
+    suspend fun insert(item: GoodItemEntity): Long
+
+    @Update
+    suspend fun update(item: GoodItemEntity)
+
+    @Delete
+    suspend fun delete(item: GoodItemEntity)
+}

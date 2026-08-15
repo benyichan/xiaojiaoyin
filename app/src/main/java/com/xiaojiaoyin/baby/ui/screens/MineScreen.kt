@@ -25,7 +25,13 @@ import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 @Composable
 fun MineScreen(
     onOpenTodo: () -> Unit = {},
-    onOpenBackup: () -> Unit = {}
+    onOpenBackup: () -> Unit = {},
+    onOpenMedical: () -> Unit = {},
+    onOpenFeedingZone: () -> Unit = {},
+    onOpenCryingZone: () -> Unit = {},
+    onOpenSchool: () -> Unit = {},
+    onOpenGoods: () -> Unit = {},
+    onOpenAnniv: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -43,6 +49,12 @@ fun MineScreen(
         )
         MenuRow("宝宝管理") {}
         MenuRow("待办清单", onClick = onOpenTodo)
+        MenuRow("医疗记录", onClick = onOpenMedical)
+        MenuRow("喂养专区", onClick = onOpenFeedingZone)
+        MenuRow("哭闹专区", onClick = onOpenCryingZone)
+        MenuRow("学籍信息", onClick = onOpenSchool)
+        MenuRow("好物清单", onClick = onOpenGoods)
+        MenuRow("那年今日", onClick = onOpenAnniv)
         MenuRow("备份与恢复", onClick = onOpenBackup)
         MenuRow("提醒设置") {}
         MenuRow("共享同步") {}

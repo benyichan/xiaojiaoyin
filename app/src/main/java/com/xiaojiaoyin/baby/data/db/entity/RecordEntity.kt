@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 enum class RecordType {
-    FEEDING, CRYING, GROWTH, PHOTO, NODE
+    FEEDING, CRYING, GROWTH, PHOTO, NODE, MEDICAL
 }
 
 @Entity(tableName = "record")

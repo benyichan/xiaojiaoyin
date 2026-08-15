@@ -40,4 +40,21 @@ class RecordRepository(private val dao: RecordDao) {
     suspend fun delete(record: RecordEntity) = dao.delete(record)
 
     suspend fun update(record: RecordEntity) = dao.update(record)
+
+    suspend fun addMedical(
+        babyId: Long,
+        category: String,
+        title: String,
+        detail: String,
+        occurredAt: Long
+    ): Long = add(
+        babyId = babyId,
+        type = RecordType.MEDICAL,
+        occurredAt = occurredAt,
+        detailJson = org.json.JSONObject()
+            .put("category", category)
+            .put("title", title)
+            .put("detail", detail)
+            .toString()
+    )
 }
