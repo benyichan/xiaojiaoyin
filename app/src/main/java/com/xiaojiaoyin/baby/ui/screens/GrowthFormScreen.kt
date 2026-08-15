@@ -112,7 +112,7 @@ fun GrowthFormScreen(onBack: () -> Unit) {
                 .put("evaluation", BmiCalculator.evaluate(weightVal, heightVal))
             scope.launch {
                 AppGraph.recordRepository.add(
-                    babyId = AppGraph.settingsRepository.getCurrentBabyId() ?: 0L,
+                    babyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository) ?: 0L,
                     type = RecordType.GROWTH,
                     occurredAt = occurredAt,
                     detailJson = detail.toString()

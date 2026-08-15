@@ -91,7 +91,7 @@ fun CryingFormScreen(onBack: () -> Unit) {
                 .put("comfort", comfort.trim())
             scope.launch {
                 AppGraph.recordRepository.add(
-                    babyId = AppGraph.settingsRepository.getCurrentBabyId() ?: 0L,
+                    babyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository) ?: 0L,
                     type = RecordType.CRYING,
                     occurredAt = occurredAt,
                     detailJson = detail.toString(),
