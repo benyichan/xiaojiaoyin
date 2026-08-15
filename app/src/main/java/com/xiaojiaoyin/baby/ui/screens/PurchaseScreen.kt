@@ -1,5 +1,8 @@
 package com.xiaojiaoyin.baby.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -13,6 +16,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,11 +27,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
+import com.xiaojiaoyin.baby.domain.License
+import com.xiaojiaoyin.baby.domain.LicenseManager
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
 import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Gold
@@ -34,18 +42,20 @@ import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun PurchaseScreen(onBack: () -> Unit) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val deviceId = remember { LicenseManager.deviceId(context) }
     val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
+    val expireAt by AppGraph.proStatusRepository.proExpireAt.collectAsStateWithLifecycle(initialValue = 0L)
+    var codeInput by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
-    val activatePro: (String) -> Unit = { label ->
-        scope.launch {
-            AppGraph.proStatusRepository.setPro(true)
-            message = "$label 已激活（演示）"
-        }
-    }
+    var copied by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -55,6 +65,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
             .padding(bottom = 30.dp)
     ) {
         OverlayHeader("订阅升级", onBack)
+
         if (isPro) {
             Box(
                 modifier = Modifier
@@ -64,13 +75,14 @@ fun PurchaseScreen(onBack: () -> Unit) {
                     .padding(16.dp)
             ) {
                 Text(
-                    "已是 Pro 用户，感谢支持 🎉",
+                    text = if (expireAt == 0L) "已是 Pro 用户（永久）" else "Pro 有效期至 ${formatExpire(expireAt)}",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
             }
         }
+
         Text(
             "Pro 专属权益",
             fontSize = 15.sp,
@@ -89,49 +101,174 @@ fun PurchaseScreen(onBack: () -> Unit) {
             }
         }
 
-        PurchaseOption("月度订阅", "¥18 / 月", "随时取消") {
-            activatePro("月度订阅（演示）")
+        Text(
+            "价格",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = TextPrimary,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+        )
+        Row(modifier = Modifier.fillMaxWidth()) {
+            PriceCard("月度", "¥6.8 / 月", "随时停用", Modifier.weight(1f))
+            PriceCard("永久", "¥159", "一次买断", Modifier.weight(1f))
         }
-        PurchaseOption("年度订阅", "¥128 / 年", "约 9 折，最受欢迎") {
-            activatePro("年度订阅（演示）")
+
+        Text(
+            "购买流程",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = TextPrimary,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+        )
+        StepRow("1", "付款：微信 / 支付宝转账 ¥6.8 或 ¥159（收款方式见付款说明）")
+        StepRow("2", "把下方设备 ID 和你的邮箱发给开发者（付款时备注或私信）")
+        StepRow("3", "收到激活码后粘贴到下面，点激活")
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .background(Card, RoundedCornerShape(18.dp))
+                .padding(14.dp)
+        ) {
+            Text("设备 ID（复制发给开发者）", fontSize = 12.sp, color = TextSecondary)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    deviceId,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = if (copied) "已复制" else "复制",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Mint,
+                    modifier = Modifier.clickable {
+                        val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        cm.setPrimaryClip(ClipData.newPlainText("deviceId", deviceId))
+                        copied = true
+                    }
+                )
+            }
         }
-        PurchaseOption("永久买断", "¥298", "一次买断，终身使用") {
-            activatePro("永久买断（演示）")
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .background(Card, RoundedCornerShape(18.dp))
+                .padding(14.dp)
+        ) {
+            Text("激活码", fontSize = 12.sp, color = TextSecondary)
+            TextField(
+                value = codeInput,
+                onValueChange = { codeInput = it.uppercase() },
+                placeholder = { Text("XXXX-XXXX-XXXX-XXXX", fontSize = 13.sp, color = TextSecondary) },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFFF5FBF8),
+                    unfocusedContainerColor = Color(0xFFF5FBF8),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp)
+            )
+            Text(
+                text = "激活",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.White,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
+                    .background(Mint, RoundedCornerShape(14.dp))
+                    .clickable {
+                        scope.launch {
+                            message = runCatching {
+                                val info = License.verifyCode(
+                                    codeInput.trim(),
+                                    LicenseManager.deviceIdBytes(context)
+                                ) ?: error("激活码无效，请检查是否复制完整、设备 ID 是否一致")
+                                AppGraph.proStatusRepository.setProWithExpire(true, info.expireAt)
+                                if (info.expireAt == 0L) "激活成功：永久 Pro" else "激活成功：Pro 至 ${formatExpire(info.expireAt)}"
+                            }.getOrElse { "激活失败：${it.message}" }
+                        }
+                    }
+                    .padding(vertical = 13.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
         }
 
         message?.let {
             Text(
                 it,
-                fontSize = 12.sp,
-                color = Mint,
+                fontSize = 13.sp,
+                color = if (it.startsWith("激活成功")) Mint else Color(0xFFD96A6A),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
         Text(
-            "当前为开发演示：点击即激活 Pro，不产生真实扣费。正式版将接入应用商店 IAP（Google Play Billing / 国内各商店 SDK），购买与恢复购买走商店回调。",
+            "付款说明：请先与开发者确认收款方式（微信/支付宝），付款后把设备 ID 和邮箱发过来，激活码会发到你的邮箱。",
             fontSize = 11.sp,
             color = TextSecondary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
     }
-
 }
 
 @Composable
-private fun PurchaseOption(title: String, price: String, desc: String, onClick: () -> Unit) {
+private fun PriceCard(title: String, price: String, desc: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .background(Card, RoundedCornerShape(18.dp))
+            .padding(16.dp)
+    ) {
+        Text(title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+        Text(price, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Mint, modifier = Modifier.padding(top = 4.dp))
+        Text(desc, fontSize = 11.sp, color = TextSecondary, modifier = Modifier.padding(top = 2.dp))
+    }
+}
+
+@Composable
+private fun StepRow(index: String, text: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 5.dp)
-            .background(Card, RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.Top
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-            Text(desc, fontSize = 11.sp, color = TextSecondary, modifier = Modifier.padding(top = 2.dp))
-        }
-        Text(price, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Mint)
+        Text(
+            index,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier
+                .background(Mint, RoundedCornerShape(99.dp))
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+        )
+        Text(
+            text,
+            fontSize = 13.sp,
+            color = TextPrimary,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp)
+        )
     }
+}
+
+private fun formatExpire(millis: Long): String {
+    val t = Instant.ofEpochMilli(millis).atZone(ZoneId.of("Asia/Shanghai"))
+    return t.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 }
