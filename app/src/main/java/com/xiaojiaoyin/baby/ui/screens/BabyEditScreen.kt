@@ -23,6 +23,7 @@ import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,8 +52,9 @@ import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BabyEditScreen(onBack: () -> Unit) {
+fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
+    var editingBaby by remember { mutableStateOf<BabyEntity?>(null) }
     var name by remember { mutableStateOf("") }
     var nickname by remember { mutableStateOf("") }
     var genderIndex by remember { mutableStateOf(0) }
@@ -64,6 +66,19 @@ fun BabyEditScreen(onBack: () -> Unit) {
     val zone = ZoneId.of("Asia/Shanghai")
     val birthTime = Instant.ofEpochMilli(birthMillis).atZone(zone)
 
+    LaunchedEffect(babyId) {
+        if (babyId != null) {
+            val baby = AppGraph.babyRepository.getById(babyId)
+            if (baby != null) {
+                editingBaby = baby
+                name = baby.name
+                nickname = baby.nickname
+                genderIndex = if (baby.gender == "男") 1 else 0
+                birthMillis = baby.birthDateTime
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -71,7 +86,7 @@ fun BabyEditScreen(onBack: () -> Unit) {
             .verticalScroll(rememberScrollState())
             .padding(bottom = 30.dp)
     ) {
-        OverlayHeader("添加宝宝", onBack)
+        OverlayHeader(if (babyId == null) "添加宝宝" else "编辑档案", onBack)
 
         Box(
             modifier = Modifier
@@ -136,24 +151,35 @@ fun BabyEditScreen(onBack: () -> Unit) {
                         return@clickable
                     }
                     scope.launch {
-                        val existing = AppGraph.babyRepository.getAll()
-                        val isPro = AppGraph.proStatusRepository.isPro.first()
-                        if (existing.isNotEmpty() && !isPro) {
-                            error = "免费版只能记录一个宝宝，升级 Pro 可添加多个"
-                            return@launch
-                        }
-                        val id = AppGraph.babyRepository.add(
-                            BabyEntity(
-                                name = name.trim(),
-                                nickname = nickname.trim(),
-                                gender = if (genderIndex == 0) "女" else "男",
-                                birthDateTime = birthMillis,
-                                avatarColorIndex = 0,
-                                createdAt = System.currentTimeMillis()
+                        if (editingBaby != null) {
+                            AppGraph.babyRepository.update(
+                                editingBaby!!.copy(
+                                    name = name.trim(),
+                                    nickname = nickname.trim(),
+                                    gender = if (genderIndex == 0) "女" else "男",
+                                    birthDateTime = birthMillis
+                                )
                             )
-                        )
-                        if (AppGraph.settingsRepository.getCurrentBabyId() == null) {
-                            AppGraph.settingsRepository.setCurrentBaby(id)
+                        } else {
+                            val existing = AppGraph.babyRepository.getAll()
+                            val isPro = AppGraph.proStatusRepository.isPro.first()
+                            if (existing.isNotEmpty() && !isPro) {
+                                error = "免费版只能记录一个宝宝，升级 Pro 可添加多个"
+                                return@launch
+                            }
+                            val id = AppGraph.babyRepository.add(
+                                BabyEntity(
+                                    name = name.trim(),
+                                    nickname = nickname.trim(),
+                                    gender = if (genderIndex == 0) "女" else "男",
+                                    birthDateTime = birthMillis,
+                                    avatarColorIndex = 0,
+                                    createdAt = System.currentTimeMillis()
+                                )
+                            )
+                            if (AppGraph.settingsRepository.getCurrentBabyId() == null) {
+                                AppGraph.settingsRepository.setCurrentBaby(id)
+                            }
                         }
                         onBack()
                     }

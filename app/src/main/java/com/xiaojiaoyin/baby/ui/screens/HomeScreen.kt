@@ -68,7 +68,7 @@ import org.json.JSONObject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onEdit: () -> Unit = {},
+    onEdit: (Long) -> Unit = {},
     onFeeding: () -> Unit = {},
     onCrying: () -> Unit = {},
     onGrowth: () -> Unit = {},
@@ -206,7 +206,7 @@ fun HomeScreen(
     }
 
     if (state.currentBaby == null) {
-        EmptyHome(onAdd = onEdit)
+        EmptyHome(onAdd = { onEdit(0) })
         return
     }
 
@@ -232,7 +232,7 @@ fun HomeScreen(
                 baby = state.currentBaby!!,
                 derivedText = state.derived,
                 isPro = isPro,
-                onEdit = onEdit
+                onEdit = { onEdit(state.currentBaby!!.id) }
             )
         }
         item { BirthdayCards(derived = state.derived) }
@@ -301,7 +301,7 @@ private fun InfoCard(
     baby: BabyEntity,
     derivedText: com.xiaojiaoyin.baby.domain.DerivedInfo?,
     isPro: Boolean,
-    onEdit: () -> Unit
+    onEdit: (Long) -> Unit
 ) {
     val d = derivedText
     Column(
@@ -328,7 +328,7 @@ private fun InfoCard(
                 color = Mint,
                 modifier = Modifier
                     .weight(1f)
-                    .clickable(onClick = onEdit),
+                    .clickable(onClick = { onEdit(baby.id) }),
                 textAlign = androidx.compose.ui.text.style.TextAlign.End
             )
         }

@@ -60,18 +60,16 @@ fun GrowthChartScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
     val context = LocalContext.current
     val whoData = remember { WhoGrowthData(context) }
     var metric by remember { mutableStateOf(0) } // 0 身高 1 体重
-    var currentBabyId by remember { mutableStateOf<Long?>(null) }
     var baby by remember { mutableStateOf<com.xiaojiaoyin.baby.data.db.entity.BabyEntity?>(null) }
-    LaunchedEffect(Unit) {
-        currentBabyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-        currentBabyId?.let { id ->
+    val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
+    LaunchedEffect(babyId) {
+        babyId?.let { id ->
             baby = AppGraph.babyRepository.getById(id)
         }
     }
-    val babyId = currentBabyId
     val records by remember(babyId) {
         if (babyId == null) flowOf(emptyList<RecordEntity>())
-        else AppGraph.recordRepository.observeByType(babyId, RecordType.GROWTH)
+        else AppGraph.recordRepository.observeByType(babyId!!, RecordType.GROWTH)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
     val isMale = baby?.gender == "男"
     val points = records.mapNotNull { r ->

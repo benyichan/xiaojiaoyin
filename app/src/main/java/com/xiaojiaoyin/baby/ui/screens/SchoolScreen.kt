@@ -48,14 +48,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun SchoolScreen(onBack: () -> Unit, onAdd: () -> Unit) {
     val scope = rememberCoroutineScope()
-    var currentBabyId by remember { mutableStateOf<Long?>(null) }
-    LaunchedEffect(Unit) {
-        currentBabyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-    }
-    val babyId = currentBabyId
+    val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val stages by remember(babyId) {
         if (babyId == null) flowOf(emptyList<SchoolStageEntity>())
-        else AppGraph.schoolStageRepository.observeAll(babyId)
+        else AppGraph.schoolStageRepository.observeAll(babyId!!)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
     var previewId by remember { mutableStateOf<Long?>(null) }
 

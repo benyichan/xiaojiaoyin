@@ -58,14 +58,10 @@ fun StatsScreen(onOpenChart: () -> Unit, onUpgrade: () -> Unit) {
         )
         return
     }
-    var currentBabyId by remember { mutableStateOf<Long?>(null) }
-    LaunchedEffect(Unit) {
-        currentBabyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-    }
-    val babyId = currentBabyId
+    val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val records by remember(babyId) {
         if (babyId == null) flowOf(emptyList<RecordEntity>())
-        else AppGraph.recordRepository.observeAll(babyId)
+        else AppGraph.recordRepository.observeAll(babyId!!)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
 
     val feedingByDay = lastNDaysFeeding(records, days = 14)

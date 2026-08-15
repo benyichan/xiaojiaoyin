@@ -23,6 +23,8 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.xiaojiaoyin.baby.ui.screens.AlbumScreen
 import com.xiaojiaoyin.baby.ui.screens.AnnivScreen
+import com.xiaojiaoyin.baby.ui.screens.AboutScreen
+import com.xiaojiaoyin.baby.ui.screens.BabyManageScreen
 import com.xiaojiaoyin.baby.ui.screens.BackupScreen
 import com.xiaojiaoyin.baby.ui.screens.BabyEditScreen
 import com.xiaojiaoyin.baby.ui.screens.CryingZoneScreen
@@ -35,11 +37,13 @@ import com.xiaojiaoyin.baby.ui.screens.GrowthFormScreen
 import com.xiaojiaoyin.baby.ui.screens.GrowthChartScreen
 import com.xiaojiaoyin.baby.ui.screens.GrowthScreen
 import com.xiaojiaoyin.baby.ui.screens.HomeScreen
+import com.xiaojiaoyin.baby.ui.screens.PrivacyPolicyScreen
 import com.xiaojiaoyin.baby.ui.screens.MedicalFormScreen
 import com.xiaojiaoyin.baby.ui.screens.MedicalScreen
 import com.xiaojiaoyin.baby.ui.screens.MineScreen
 import com.xiaojiaoyin.baby.ui.screens.NodeFormScreen
 import com.xiaojiaoyin.baby.ui.screens.PurchaseScreen
+import com.xiaojiaoyin.baby.ui.screens.ReminderSettingsScreen
 import com.xiaojiaoyin.baby.ui.screens.SchoolFormScreen
 import com.xiaojiaoyin.baby.ui.screens.SchoolScreen
 import com.xiaojiaoyin.baby.ui.screens.StatsScreen
@@ -56,7 +60,7 @@ sealed interface Route {
     data object Album : Route
     data object Stats : Route
     data object Mine : Route
-    data object EditBaby : Route
+    data class EditBaby(val babyId: Long? = null) : Route
     data object Feeding : Route
     data object Crying : Route
     data object GrowthForm : Route
@@ -75,6 +79,10 @@ sealed interface Route {
     data object Anniv : Route
     data object Sync : Route
     data object Purchase : Route
+    data object BabyManage : Route
+    data object About : Route
+    data object Privacy : Route
+    data object ReminderSettings : Route
 }
 
 private val TABS = listOf(
@@ -108,14 +116,14 @@ fun AppNav() {
                 when (key) {
                     Route.Home -> NavEntry(key) {
                         HomeScreen(
-                            onEdit = {
+                            onEdit = { id ->
                                 android.util.Log.d("AppNav", "onEdit clicked, stack=${backStack.size}")
-                                backStack.add(Route.EditBaby)
+                                backStack.add(Route.EditBaby(id))
                             },
                             onFeeding = { backStack.add(Route.Feeding) },
                             onCrying = { backStack.add(Route.Crying) },
                             onGrowth = { backStack.add(Route.GrowthForm) },
-                            onAddBaby = { backStack.add(Route.EditBaby) },
+                            onAddBaby = { backStack.add(Route.EditBaby(null)) },
                             onUpgrade = { backStack.add(Route.Purchase) }
                         )
                     }
@@ -142,10 +150,16 @@ fun AppNav() {
                             onOpenGoods = { backStack.add(Route.Goods) },
                             onOpenAnniv = { backStack.add(Route.Anniv) },
                             onOpenSync = { backStack.add(Route.Sync) },
-                            onOpenPurchase = { backStack.add(Route.Purchase) }
+                            onOpenPurchase = { backStack.add(Route.Purchase) },
+                            onOpenBabyManage = { backStack.add(Route.BabyManage) },
+                            onOpenReminderSettings = { backStack.add(Route.ReminderSettings) },
+                            onOpenPrivacy = { backStack.add(Route.Privacy) },
+                            onOpenAbout = { backStack.add(Route.About) }
                         )
                     }
-                    Route.EditBaby -> NavEntry(key) { BabyEditScreen(onBack = { backStack.removeLastOrNull() }) }
+                    is Route.EditBaby -> NavEntry(key) {
+                        BabyEditScreen(babyId = key.babyId, onBack = { backStack.removeLastOrNull() })
+                    }
                     Route.Feeding -> NavEntry(key) { FeedingFormScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Crying -> NavEntry(key) { CryingFormScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.GrowthForm -> NavEntry(key) { GrowthFormScreen(onBack = { backStack.removeLastOrNull() }) }
@@ -199,6 +213,17 @@ fun AppNav() {
                         )
                     }
                     Route.Purchase -> NavEntry(key) { PurchaseScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.BabyManage -> NavEntry(key) {
+                        BabyManageScreen(
+                            onBack = { backStack.removeLastOrNull() },
+                            onEdit = { id -> backStack.add(Route.EditBaby(id)) },
+                            onAdd = { backStack.add(Route.EditBaby(null)) },
+                            onUpgrade = { backStack.add(Route.Purchase) }
+                        )
+                    }
+                    Route.About -> NavEntry(key) { AboutScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.Privacy -> NavEntry(key) { PrivacyPolicyScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.ReminderSettings -> NavEntry(key) { ReminderSettingsScreen(onBack = { backStack.removeLastOrNull() }) }
                     else -> NavEntry(key) { Text("未实现页面") }
                 }
             }

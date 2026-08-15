@@ -55,14 +55,10 @@ import kotlinx.coroutines.launch
 fun TodoScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var currentBabyId by remember { mutableStateOf<Long?>(null) }
-    LaunchedEffect(Unit) {
-        currentBabyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-    }
-    val babyId = currentBabyId
+    val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val todos by remember(babyId) {
         if (babyId == null) kotlinx.coroutines.flow.flowOf(emptyList<TodoEntity>())
-        else AppGraph.todoRepository.observeAll(babyId)
+        else AppGraph.todoRepository.observeAll(babyId!!)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
     val scheduler = remember { ReminderScheduler(context.applicationContext) }
     var showAdd by remember { mutableStateOf(false) }
@@ -159,7 +155,7 @@ fun TodoScreen(onBack: () -> Unit) {
             onSave = { title, timeAt, remind ->
                 scope.launch {
                     val id = AppGraph.todoRepository.add(
-                        babyId = currentBabyId ?: 0L,
+                        babyId = babyId ?: 0L,
                         title = title,
                         timeAt = timeAt,
                         remindEnabled = remind
@@ -168,7 +164,7 @@ fun TodoScreen(onBack: () -> Unit) {
                         scheduler.schedule(
                             TodoEntity(
                                 id = id,
-                                babyId = currentBabyId ?: 0L,
+                                babyId = babyId ?: 0L,
                                 title = title,
                                 timeAt = timeAt,
                                 remindEnabled = true,

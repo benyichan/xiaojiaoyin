@@ -41,7 +41,11 @@ fun MineScreen(
     onOpenGoods: () -> Unit = {},
     onOpenAnniv: () -> Unit = {},
     onOpenSync: () -> Unit = {},
-    onOpenPurchase: () -> Unit = {}
+    onOpenPurchase: () -> Unit = {},
+    onOpenBabyManage: () -> Unit = {},
+    onOpenReminderSettings: () -> Unit = {},
+    onOpenPrivacy: () -> Unit = {},
+    onOpenAbout: () -> Unit = {}
 ) {
     val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
     val expireAt by AppGraph.proStatusRepository.proExpireAt.collectAsStateWithLifecycle(initialValue = 0L)
@@ -65,7 +69,7 @@ fun MineScreen(
             expireAt = expireAt,
             onUpgrade = onOpenPurchase
         )
-        MenuRow("宝宝管理") {}
+        MenuRow("宝宝管理", onClick = onOpenBabyManage)
         MenuRow("待办清单", onClick = onOpenTodo)
         MenuRow("医疗记录", onClick = onOpenMedical)
         MenuRow("喂养专区", onClick = onOpenFeedingZone)
@@ -75,10 +79,10 @@ fun MineScreen(
         MenuRow("那年今日", onClick = onOpenAnniv)
         MenuRow("备份与恢复", onClick = onOpenBackup)
         MenuRow("共享同步", onClick = onOpenSync)
-        MenuRow("提醒设置") {}
+        MenuRow("提醒设置", onClick = onOpenReminderSettings)
         MenuRow("订阅升级", onClick = onOpenPurchase)
-        MenuRow("隐私政策") {}
-        MenuRow("关于") {}
+        MenuRow("隐私政策", onClick = onOpenPrivacy)
+        MenuRow("关于", onClick = onOpenAbout)
     }
 }
 

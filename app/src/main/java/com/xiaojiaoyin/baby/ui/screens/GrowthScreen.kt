@@ -49,14 +49,10 @@ import java.time.ZoneId
 @Composable
 fun GrowthScreen(onAddNode: () -> Unit) {
     val scope = rememberCoroutineScope()
-    var currentBabyId by remember { mutableStateOf<Long?>(null) }
-    LaunchedEffect(Unit) {
-        currentBabyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-    }
-    val babyId = currentBabyId
+    val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val nodes by remember(babyId) {
         if (babyId == null) flowOf(emptyList<RecordEntity>())
-        else AppGraph.recordRepository.observeByType(babyId, RecordType.NODE)
+        else AppGraph.recordRepository.observeByType(babyId!!, RecordType.NODE)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
     var query by remember { mutableStateOf("") }
     var previewId by remember { mutableStateOf<Long?>(null) }

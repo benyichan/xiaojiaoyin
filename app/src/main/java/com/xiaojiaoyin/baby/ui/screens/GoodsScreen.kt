@@ -46,14 +46,10 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit) {
     val scope = rememberCoroutineScope()
-    var currentBabyId by remember { mutableStateOf<Long?>(null) }
-    LaunchedEffect(Unit) {
-        currentBabyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-    }
-    val babyId = currentBabyId
+    val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val items by remember(babyId) {
         if (babyId == null) flowOf(emptyList<GoodItemEntity>())
-        else AppGraph.goodItemRepository.observeAll(babyId)
+        else AppGraph.goodItemRepository.observeAll(babyId!!)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
     var previewId by remember { mutableStateOf<Long?>(null) }
 

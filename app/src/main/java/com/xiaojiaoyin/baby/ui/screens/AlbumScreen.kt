@@ -61,14 +61,10 @@ import java.time.ZoneId
 fun AlbumScreen(onUpgrade: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var currentBabyId by remember { mutableStateOf<Long?>(null) }
-    LaunchedEffect(Unit) {
-        currentBabyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-    }
-    val babyId = currentBabyId
+    val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val photos by remember(babyId) {
         if (babyId == null) flowOf(emptyList<RecordEntity>())
-        else AppGraph.recordRepository.observeByType(babyId, RecordType.PHOTO)
+        else AppGraph.recordRepository.observeByType(babyId!!, RecordType.PHOTO)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
     var query by remember { mutableStateOf("") }
     var previewId by remember { mutableStateOf<Long?>(null) }
@@ -83,9 +79,9 @@ fun AlbumScreen(onUpgrade: () -> Unit) {
                     showUpgrade = true
                 } else {
                     val path = PhotoStorage.saveImage(context, uri)
-                    if (path != null && currentBabyId != null) {
-                        AppGraph.recordRepository.add(
-                            babyId = currentBabyId!!,
+                if (path != null && babyId != null) {
+                    AppGraph.recordRepository.add(
+                        babyId = babyId!!,
                             type = RecordType.PHOTO,
                             occurredAt = System.currentTimeMillis(),
                             detailJson = JSONObject().put("path", path).toString()

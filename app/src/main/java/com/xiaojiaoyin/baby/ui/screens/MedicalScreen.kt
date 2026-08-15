@@ -55,14 +55,10 @@ private val MEDICAL_CATEGORIES = listOf("疫苗", "体检", "就诊", "用药")
 @Composable
 fun MedicalScreen(onBack: () -> Unit, onAdd: () -> Unit) {
     val scope = rememberCoroutineScope()
-    var currentBabyId by remember { mutableStateOf<Long?>(null) }
-    LaunchedEffect(Unit) {
-        currentBabyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-    }
-    val babyId = currentBabyId
+    val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val records by remember(babyId) {
         if (babyId == null) flowOf(emptyList<RecordEntity>())
-        else AppGraph.recordRepository.observeByType(babyId, RecordType.MEDICAL)
+        else AppGraph.recordRepository.observeByType(babyId!!, RecordType.MEDICAL)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
     var filter by remember { mutableStateOf("全部") }
     var previewId by remember { mutableStateOf<Long?>(null) }

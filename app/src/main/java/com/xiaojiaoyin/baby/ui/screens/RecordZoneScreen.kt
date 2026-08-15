@@ -97,14 +97,10 @@ private fun RecordZoneScreen(
     line: @Composable (RecordEntity) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    var currentBabyId by remember { mutableStateOf<Long?>(null) }
-    LaunchedEffect(Unit) {
-        currentBabyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-    }
-    val babyId = currentBabyId
+    val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val records by remember(babyId) {
         if (babyId == null) flowOf(emptyList<RecordEntity>())
-        else AppGraph.recordRepository.observeByType(babyId, type)
+        else AppGraph.recordRepository.observeByType(babyId!!, type)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
     var previewId by remember { mutableStateOf<Long?>(null) }
 
