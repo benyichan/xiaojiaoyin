@@ -24,6 +24,8 @@ class FeedRulesTest {
     @Test
     fun `生长永远活跃`() {
         assertTrue(FeedRules.isActive(RecordType.GROWTH, ageMonths = 120))
+        assertTrue(FeedRules.isActive(RecordType.PHOTO, ageMonths = 120))
+        assertTrue(FeedRules.isActive(RecordType.NODE, ageMonths = 120))
     }
 
     @Test

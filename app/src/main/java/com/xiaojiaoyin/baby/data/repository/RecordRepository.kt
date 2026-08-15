@@ -11,6 +11,9 @@ class RecordRepository(private val dao: RecordDao) {
 
     fun observeAll(babyId: Long): Flow<List<RecordEntity>> = dao.observeAll(babyId)
 
+    fun observeByType(babyId: Long, type: RecordType): Flow<List<RecordEntity>> =
+        dao.observeByType(babyId, type)
+
     suspend fun add(
         babyId: Long,
         type: RecordType,
@@ -33,4 +36,8 @@ class RecordRepository(private val dao: RecordDao) {
 
     suspend fun lastOfType(babyId: Long, type: RecordType): RecordEntity? =
         dao.lastOfType(babyId, type)
+
+    suspend fun delete(record: RecordEntity) = dao.delete(record)
+
+    suspend fun update(record: RecordEntity) = dao.update(record)
 }

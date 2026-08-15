@@ -1,5 +1,7 @@
 package com.xiaojiaoyin.baby.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,12 +31,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xiaojiaoyin.baby.data.AppGraph
+import com.xiaojiaoyin.baby.data.PhotoStorage
 import com.xiaojiaoyin.baby.data.db.entity.BabyEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordType
 import com.xiaojiaoyin.baby.ui.components.BabyCard
@@ -57,6 +61,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import org.json.JSONObject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +77,24 @@ fun HomeScreen(
     val state by vm.uiState.collectAsStateWithLifecycle()
     var showBabyPicker by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val path = PhotoStorage.saveImage(context, uri)
+                val babyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
+                if (path != null && babyId != null) {
+                    AppGraph.recordRepository.add(
+                        babyId = babyId,
+                        type = RecordType.PHOTO,
+                        occurredAt = System.currentTimeMillis(),
+                        detailJson = JSONObject().put("path", path).toString()
+                    )
+                }
+            }
+        }
+    }
 
     if (showBabyPicker && state.babies.size > 1) {
         ModalBottomSheet(onDismissRequest = { showBabyPicker = false }) {
@@ -142,7 +165,14 @@ fun HomeScreen(
         }
         item { InfoCard(baby = state.currentBaby!!, derivedText = state.derived, onEdit = onEdit) }
         item { BirthdayCards(derived = state.derived) }
-        item { QuickActions(onFeeding, onCrying, onGrowth) }
+        item {
+            QuickActions(
+                onFeeding = onFeeding,
+                onCrying = onCrying,
+                onGrowth = onGrowth,
+                onPhoto = { photoPicker.launch(arrayOf("*/*")) }
+            )
+        }
         item { Spacer(Modifier.height(8.dp)) }
         item {
             SectionHeader(
@@ -313,7 +343,12 @@ private fun BirthdayCard(
 }
 
 @Composable
-private fun QuickActions(onFeeding: () -> Unit, onCrying: () -> Unit, onGrowth: () -> Unit) {
+private fun QuickActions(
+    onFeeding: () -> Unit,
+    onCrying: () -> Unit,
+    onGrowth: () -> Unit,
+    onPhoto: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -323,7 +358,7 @@ private fun QuickActions(onFeeding: () -> Unit, onCrying: () -> Unit, onGrowth: 
         QuickItem("喂养", Mint, onFeeding, Modifier.weight(1f))
         QuickItem("哭闹", Pink, onCrying, Modifier.weight(1f))
         QuickItem("生长", Blue, onGrowth, Modifier.weight(1f))
-        QuickItem("拍照", Gold, {}, Modifier.weight(1f))
+        QuickItem("拍照", Gold, onPhoto, Modifier.weight(1f))
     }
 }
 
@@ -388,6 +423,22 @@ private fun FeedCard(record: com.xiaojiaoyin.baby.data.db.entity.RecordEntity) {
                 kind = TagKind.GROWTH,
                 tagText = "生长",
                 title = "身高 ${h}cm · 体重 ${w}kg",
+                sub = formatTime(record.occurredAt)
+            )
+        }
+        RecordType.PHOTO -> {
+            FeedUi(
+                kind = TagKind.PHOTO,
+                tagText = "相册",
+                title = record.note.ifBlank { "新照片" },
+                sub = formatTime(record.occurredAt)
+            )
+        }
+        RecordType.NODE -> {
+            FeedUi(
+                kind = TagKind.NODE,
+                tagText = "节点",
+                title = record.title(),
                 sub = formatTime(record.occurredAt)
             )
         }

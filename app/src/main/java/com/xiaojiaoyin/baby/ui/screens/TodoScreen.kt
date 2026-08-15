@@ -22,6 +22,7 @@ import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,11 +55,14 @@ import kotlinx.coroutines.launch
 fun TodoScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val currentBabyId by AppGraph.settingsRepository.currentBabyId
-        .collectAsStateWithLifecycle(initialValue = null)
-    val todos by remember(currentBabyId) {
-        if (currentBabyId == null) kotlinx.coroutines.flow.flowOf(emptyList<TodoEntity>())
-        else AppGraph.todoRepository.observeAll(currentBabyId!!)
+    var currentBabyId by remember { mutableStateOf<Long?>(null) }
+    LaunchedEffect(Unit) {
+        currentBabyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
+    }
+    val babyId = currentBabyId
+    val todos by remember(babyId) {
+        if (babyId == null) kotlinx.coroutines.flow.flowOf(emptyList<TodoEntity>())
+        else AppGraph.todoRepository.observeAll(babyId)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
     val scheduler = remember { ReminderScheduler(context.applicationContext) }
     var showAdd by remember { mutableStateOf(false) }

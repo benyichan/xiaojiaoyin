@@ -43,7 +43,8 @@ class BackupManager(private val context: Context) {
                 listOf(
                     "database.db" to dbFile,
                     "database.db-wal" to File(dbFile.path + "-wal"),
-                    "database.db-shm" to File(dbFile.path + "-shm")
+                    "database.db-shm" to File(dbFile.path + "-shm"),
+                    "settings.preferences_pb" to File(context.filesDir, "datastore/settings.preferences_pb")
                 ).forEach { (name, file) ->
                     if (file.exists()) {
                         zip.putNextEntry(ZipEntry(name))
@@ -102,6 +103,15 @@ class BackupManager(private val context: Context) {
             val src = File(tmpDir, name)
             if (src.exists()) {
                 src.copyTo(File(dbFile.path + name.removePrefix("database.db")), overwrite = true)
+            }
+        }
+        // 恢复设置文件（currentBabyId、类型显示设置）；失败不影响主数据
+        runCatching {
+            val settingsBackup = File(tmpDir, "settings.preferences_pb")
+            if (settingsBackup.exists()) {
+                val dest = File(context.filesDir, "datastore/settings.preferences_pb")
+                dest.parentFile?.mkdirs()
+                settingsBackup.copyTo(dest, overwrite = true)
             }
         }
         tmpDir.deleteRecursively()

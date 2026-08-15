@@ -23,6 +23,11 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun getCurrentBabyId(): Long? = currentBabyId.first()
 
+    /** 兜底：设置里没有当前宝宝时取第一个宝宝 */
+    suspend fun resolveCurrentBabyId(
+        babyRepo: com.xiaojiaoyin.baby.data.repository.BabyRepository
+    ): Long? = getCurrentBabyId() ?: babyRepo.getAll().firstOrNull()?.id
+
     /** 类型显示覆盖："follow"（默认）/ "always" / "hidden" */
     val typeVisibility: Flow<Map<String, String>> =
         context.dataStore.data.map { prefs ->

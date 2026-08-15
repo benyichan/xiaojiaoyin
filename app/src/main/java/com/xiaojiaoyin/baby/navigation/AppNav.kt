@@ -30,6 +30,7 @@ import com.xiaojiaoyin.baby.ui.screens.GrowthFormScreen
 import com.xiaojiaoyin.baby.ui.screens.GrowthScreen
 import com.xiaojiaoyin.baby.ui.screens.HomeScreen
 import com.xiaojiaoyin.baby.ui.screens.MineScreen
+import com.xiaojiaoyin.baby.ui.screens.NodeFormScreen
 import com.xiaojiaoyin.baby.ui.screens.StatsScreen
 import com.xiaojiaoyin.baby.ui.screens.TodoScreen
 import com.xiaojiaoyin.baby.ui.theme.Bg
@@ -49,6 +50,7 @@ sealed interface Route {
     data object GrowthForm : Route
     data object Todo : Route
     data object Backup : Route
+    data object NodeForm : Route
 }
 
 private val TABS = listOf(
@@ -91,7 +93,9 @@ fun AppNav() {
                             onGrowth = { backStack.add(Route.GrowthForm) }
                         )
                     }
-                    Route.Growth -> NavEntry(key) { GrowthScreen() }
+                    Route.Growth -> NavEntry(key) {
+                        GrowthScreen(onAddNode = { backStack.add(Route.NodeForm) })
+                    }
                     Route.Album -> NavEntry(key) { AlbumScreen() }
                     Route.Stats -> NavEntry(key) { StatsScreen() }
                     Route.Mine -> NavEntry(key) {
@@ -106,6 +110,7 @@ fun AppNav() {
                     Route.GrowthForm -> NavEntry(key) { GrowthFormScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Todo -> NavEntry(key) { TodoScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Backup -> NavEntry(key) { BackupScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.NodeForm -> NavEntry(key) { NodeFormScreen(onBack = { backStack.removeLastOrNull() }) }
                     else -> NavEntry(key) { Text("未实现页面") }
                 }
             }
