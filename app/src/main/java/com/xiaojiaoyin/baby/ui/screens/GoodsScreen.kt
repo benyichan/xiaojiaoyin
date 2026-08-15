@@ -63,15 +63,6 @@ fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit) {
             .statusBarsPadding()
     ) {
         OverlayHeader("好物清单", onBack)
-        if (items.isNotEmpty()) {
-            Text(
-                "共 ${items.size} 件 · 总花费 ¥%.2f".format(items.sumOf { it.priceYuan }),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-            )
-        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
