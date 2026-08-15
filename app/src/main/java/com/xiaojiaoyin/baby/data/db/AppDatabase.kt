@@ -48,7 +48,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     NAME
                 )
-                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                     .also { instance = it }
             }
@@ -56,6 +56,34 @@ abstract class AppDatabase : RoomDatabase() {
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE record ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `school_stage` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`babyId` INTEGER NOT NULL, " +
+                        "`stageType` TEXT NOT NULL, " +
+                        "`className` TEXT NOT NULL, " +
+                        "`schoolName` TEXT NOT NULL, " +
+                        "`teacher` TEXT NOT NULL, " +
+                        "`startAt` TEXT NOT NULL, " +
+                        "`endAt` TEXT NOT NULL, " +
+                        "`studentNo` TEXT NOT NULL, " +
+                        "`note` TEXT NOT NULL, " +
+                        "`createdAt` INTEGER NOT NULL)"
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `good_item` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`babyId` INTEGER NOT NULL, " +
+                        "`name` TEXT NOT NULL, " +
+                        "`rating` INTEGER NOT NULL, " +
+                        "`note` TEXT NOT NULL, " +
+                        "`createdAt` INTEGER NOT NULL)"
+                )
             }
         }
 
