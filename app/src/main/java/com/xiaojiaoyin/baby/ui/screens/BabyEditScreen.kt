@@ -47,6 +47,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,6 +136,12 @@ fun BabyEditScreen(onBack: () -> Unit) {
                         return@clickable
                     }
                     scope.launch {
+                        val existing = AppGraph.babyRepository.getAll()
+                        val isPro = AppGraph.proStatusRepository.isPro.first()
+                        if (existing.isNotEmpty() && !isPro) {
+                            error = "免费版只能记录一个宝宝，升级 Pro 可添加多个"
+                            return@launch
+                        }
                         val id = AppGraph.babyRepository.add(
                             BabyEntity(
                                 name = name.trim(),

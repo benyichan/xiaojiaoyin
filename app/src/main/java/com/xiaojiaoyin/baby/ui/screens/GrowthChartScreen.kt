@@ -34,6 +34,7 @@ import com.xiaojiaoyin.baby.domain.WhoGrowthData
 import com.xiaojiaoyin.baby.ui.components.LineChart
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
 import com.xiaojiaoyin.baby.ui.components.SegmentedField
+import com.xiaojiaoyin.baby.ui.components.ProLockedView
 import com.xiaojiaoyin.baby.ui.theme.Blue
 import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Gold
@@ -46,7 +47,16 @@ import java.time.Instant
 import java.time.ZoneId
 
 @Composable
-fun GrowthChartScreen(onBack: () -> Unit) {
+fun GrowthChartScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
+    val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
+    if (!isPro) {
+        ProLockedView(
+            title = "生长曲线",
+            desc = "身高 / 体重对照 WHO 标准是 Pro 专属功能",
+            onUpgrade = onUpgrade
+        )
+        return
+    }
     val context = LocalContext.current
     val whoData = remember { WhoGrowthData(context) }
     var metric by remember { mutableStateOf(0) } // 0 身高 1 体重

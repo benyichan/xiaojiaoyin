@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -57,6 +58,7 @@ import com.xiaojiaoyin.baby.ui.theme.PinkLight
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import com.xiaojiaoyin.baby.ui.viewmodel.HomeViewModel
+import com.xiaojiaoyin.baby.data.settings.ProStatusRepository
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -69,34 +71,46 @@ fun HomeScreen(
     onEdit: () -> Unit = {},
     onFeeding: () -> Unit = {},
     onCrying: () -> Unit = {},
-    onGrowth: () -> Unit = {}
+    onGrowth: () -> Unit = {},
+    onAddBaby: () -> Unit = {},
+    onUpgrade: () -> Unit = {}
 ) {
     val vm: HomeViewModel = viewModel {
         HomeViewModel(AppGraph.babyRepository, AppGraph.recordRepository, AppGraph.settingsRepository)
     }
     val state by vm.uiState.collectAsStateWithLifecycle()
     var showBabyPicker by remember { mutableStateOf(false) }
+    val FREE_PHOTO_LIMIT = 30
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
+    val photoCount by AppGraph.recordRepository
+        .observeByType(state.currentBaby?.id ?: -1, RecordType.PHOTO)
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+    var showUpgrade by remember { mutableStateOf(false) }
 
     val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             scope.launch {
-                val path = PhotoStorage.saveImage(context, uri)
-                val babyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-                if (path != null && babyId != null) {
-                    AppGraph.recordRepository.add(
-                        babyId = babyId,
-                        type = RecordType.PHOTO,
-                        occurredAt = System.currentTimeMillis(),
-                        detailJson = JSONObject().put("path", path).toString()
-                    )
+                if (!isPro && photoCount.size >= FREE_PHOTO_LIMIT) {
+                    showUpgrade = true
+                } else {
+                    val path = PhotoStorage.saveImage(context, uri)
+                    val babyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
+                    if (path != null && babyId != null) {
+                        AppGraph.recordRepository.add(
+                            babyId = babyId,
+                            type = RecordType.PHOTO,
+                            occurredAt = System.currentTimeMillis(),
+                            detailJson = JSONObject().put("path", path).toString()
+                        )
+                    }
                 }
             }
         }
     }
 
-    if (showBabyPicker && state.babies.size > 1) {
+    if (showBabyPicker && state.babies.isNotEmpty()) {
         ModalBottomSheet(onDismissRequest = { showBabyPicker = false }) {
             state.babies.forEach { baby ->
                 Row(
@@ -138,7 +152,57 @@ fun HomeScreen(
                     }
                 }
             }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (!isPro && state.babies.size >= 1) {
+                            showUpgrade = true
+                            showBabyPicker = false
+                        } else {
+                            showBabyPicker = false
+                            onAddBaby()
+                        }
+                    }
+                    .padding(16.dp)
+            ) {
+                Text(
+                    "＋ 添加宝宝",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Mint
+                )
+                if (!isPro) {
+                    Text(
+                        "Pro",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Gold,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .background(GoldLight, RoundedCornerShape(9.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
         }
+    }
+
+    if (showUpgrade) {
+        AlertDialog(
+            onDismissRequest = { showUpgrade = false },
+            title = { Text("升级 Pro", fontWeight = FontWeight.Bold) },
+            text = { Text("这是 Pro 专属功能：多宝宝档案、无限照片等。") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    showUpgrade = false
+                    onUpgrade()
+                }) { Text("去升级", color = Mint) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showUpgrade = false }) { Text("暂不") }
+            }
+        )
     }
 
     if (state.currentBaby == null) {

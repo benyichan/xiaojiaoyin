@@ -30,10 +30,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.sync.SyncManager
+import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.sync.SyncMerger
 import com.xiaojiaoyin.baby.sync.SyncNetwork
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
+import com.xiaojiaoyin.baby.ui.components.ProLockedView
 import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
@@ -41,7 +44,16 @@ import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
 
 @Composable
-fun SyncScreen(onBack: () -> Unit) {
+fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
+    val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
+    if (!isPro) {
+        ProLockedView(
+            title = "多设备离线共享",
+            desc = "两台手机同步是 Pro 专属功能",
+            onUpgrade = onUpgrade
+        )
+        return
+    }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val syncManager = remember { SyncManager() }

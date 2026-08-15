@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
@@ -57,7 +58,7 @@ import java.time.Instant
 import java.time.ZoneId
 
 @Composable
-fun AlbumScreen() {
+fun AlbumScreen(onUpgrade: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var currentBabyId by remember { mutableStateOf<Long?>(null) }
@@ -71,18 +72,25 @@ fun AlbumScreen() {
     }.collectAsStateWithLifecycle(initialValue = emptyList())
     var query by remember { mutableStateOf("") }
     var previewId by remember { mutableStateOf<Long?>(null) }
+    var showUpgrade by remember { mutableStateOf(false) }
+    val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
+    val FREE_PHOTO_LIMIT = 30
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             scope.launch {
-                val path = PhotoStorage.saveImage(context, uri)
-                if (path != null && currentBabyId != null) {
-                    AppGraph.recordRepository.add(
-                        babyId = currentBabyId!!,
-                        type = RecordType.PHOTO,
-                        occurredAt = System.currentTimeMillis(),
-                        detailJson = JSONObject().put("path", path).toString()
-                    )
+                if (!isPro && photos.size >= FREE_PHOTO_LIMIT) {
+                    showUpgrade = true
+                } else {
+                    val path = PhotoStorage.saveImage(context, uri)
+                    if (path != null && currentBabyId != null) {
+                        AppGraph.recordRepository.add(
+                            babyId = currentBabyId!!,
+                            type = RecordType.PHOTO,
+                            occurredAt = System.currentTimeMillis(),
+                            detailJson = JSONObject().put("path", path).toString()
+                        )
+                    }
                 }
             }
         }
@@ -187,6 +195,23 @@ fun AlbumScreen() {
                     AppGraph.recordRepository.update(previewRecord.copy(note = note.trim()))
                 }
                 previewId = null
+            }
+        )
+    }
+
+    if (showUpgrade) {
+        AlertDialog(
+            onDismissRequest = { showUpgrade = false },
+            title = { Text("照片空间", fontWeight = FontWeight.Bold) },
+            text = { Text("免费版最多存 $FREE_PHOTO_LIMIT 张照片，升级 Pro 无限照片。") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showUpgrade = false
+                    onUpgrade()
+                }) { Text("去升级", color = Mint) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showUpgrade = false }) { Text("暂不") }
             }
         )
     }

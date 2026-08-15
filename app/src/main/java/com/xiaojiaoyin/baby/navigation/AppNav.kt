@@ -114,15 +114,22 @@ fun AppNav() {
                             },
                             onFeeding = { backStack.add(Route.Feeding) },
                             onCrying = { backStack.add(Route.Crying) },
-                            onGrowth = { backStack.add(Route.GrowthForm) }
+                            onGrowth = { backStack.add(Route.GrowthForm) },
+                            onAddBaby = { backStack.add(Route.EditBaby) },
+                            onUpgrade = { backStack.add(Route.Purchase) }
                         )
                     }
                     Route.Growth -> NavEntry(key) {
                         GrowthScreen(onAddNode = { backStack.add(Route.NodeForm) })
                     }
-                    Route.Album -> NavEntry(key) { AlbumScreen() }
+                    Route.Album -> NavEntry(key) {
+                        AlbumScreen(onUpgrade = { backStack.add(Route.Purchase) })
+                    }
                     Route.Stats -> NavEntry(key) {
-                        StatsScreen(onOpenChart = { backStack.add(Route.GrowthChart) })
+                        StatsScreen(
+                            onOpenChart = { backStack.add(Route.GrowthChart) },
+                            onUpgrade = { backStack.add(Route.Purchase) }
+                        )
                     }
                     Route.Mine -> NavEntry(key) {
                         MineScreen(
@@ -145,7 +152,12 @@ fun AppNav() {
                     Route.Todo -> NavEntry(key) { TodoScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Backup -> NavEntry(key) { BackupScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.NodeForm -> NavEntry(key) { NodeFormScreen(onBack = { backStack.removeLastOrNull() }) }
-                    Route.GrowthChart -> NavEntry(key) { GrowthChartScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.GrowthChart -> NavEntry(key) {
+                        GrowthChartScreen(
+                            onBack = { backStack.removeLastOrNull() },
+                            onUpgrade = { backStack.add(Route.Purchase) }
+                        )
+                    }
                     Route.Medical -> NavEntry(key) {
                         MedicalScreen(
                             onBack = { backStack.removeLastOrNull() },
@@ -180,7 +192,12 @@ fun AppNav() {
                     }
                     Route.GoodsForm -> NavEntry(key) { GoodsFormScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Anniv -> NavEntry(key) { AnnivScreen(onBack = { backStack.removeLastOrNull() }) }
-                    Route.Sync -> NavEntry(key) { SyncScreen(onBack = { backStack.removeLastOrNull() }) }
+                    Route.Sync -> NavEntry(key) {
+                        SyncScreen(
+                            onBack = { backStack.removeLastOrNull() },
+                            onUpgrade = { backStack.add(Route.Purchase) }
+                        )
+                    }
                     Route.Purchase -> NavEntry(key) { PurchaseScreen(onBack = { backStack.removeLastOrNull() }) }
                     else -> NavEntry(key) { Text("未实现页面") }
                 }
