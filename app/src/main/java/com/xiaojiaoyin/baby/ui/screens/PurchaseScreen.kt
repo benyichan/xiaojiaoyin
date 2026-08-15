@@ -50,6 +50,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+private const val DEV_EMAIL = "benyi@aliyun.com"
+
 @Composable
 fun PurchaseScreen(onBack: () -> Unit) {
     val context = LocalContext.current
@@ -60,6 +62,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
     var codeInput by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
     var copied by remember { mutableStateOf(false) }
+    var selectedPlan by remember { mutableStateOf("L") }
 
     Column(
         modifier = Modifier
@@ -113,8 +116,20 @@ fun PurchaseScreen(onBack: () -> Unit) {
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         )
         Row(modifier = Modifier.fillMaxWidth()) {
-            PriceCard("月度", "¥6.8 / 月", "随时停用", Modifier.weight(1f))
-            PriceCard("永久", "¥159", "一次买断", Modifier.weight(1f))
+            PriceCard(
+                title = "月度",
+                price = "¥6.8 / 月",
+                desc = "随时停用",
+                selected = selectedPlan == "M",
+                modifier = Modifier.weight(1f)
+            ) { selectedPlan = "M" }
+            PriceCard(
+                title = "永久",
+                price = "¥159",
+                desc = "一次买断",
+                selected = selectedPlan == "L",
+                modifier = Modifier.weight(1f)
+            ) { selectedPlan = "L" }
         }
 
         Text(
@@ -125,8 +140,8 @@ fun PurchaseScreen(onBack: () -> Unit) {
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         )
         StepRow("1", "扫码付款：¥6.8（月）或 ¥159（永久）")
-        StepRow("2", "把下方设备 ID 和你的邮箱发给开发者（付款时备注或私信）")
-        StepRow("3", "收到激活码后粘贴到下面，点激活")
+        StepRow("2", "发邮件到 benyi@aliyun.com，附上设备 ID 和你常用的邮箱")
+        StepRow("3", "收到回复的激活码后粘贴到下面，点激活")
 
         Column(
             modifier = Modifier
@@ -135,7 +150,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
                 .background(Card, RoundedCornerShape(18.dp))
                 .padding(14.dp)
         ) {
-            Text("设备 ID（复制发给开发者）", fontSize = 12.sp, color = TextSecondary)
+            Text("设备 ID（付款后随邮件发送）", fontSize = 12.sp, color = TextSecondary)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -161,6 +176,52 @@ fun PurchaseScreen(onBack: () -> Unit) {
                     }
                 )
             }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("开发者邮箱", fontSize = 12.sp, color = TextSecondary, modifier = Modifier.weight(1f))
+                Text(
+                    DEV_EMAIL,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                Text(
+                    text = "复制",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Mint,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .clickable {
+                            val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            cm.setPrimaryClip(ClipData.newPlainText("devEmail", DEV_EMAIL))
+                            copied = true
+                        }
+                )
+            }
+            Text(
+                text = "复制申请内容（粘贴到邮件）",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
+                    .background(Mint, RoundedCornerShape(12.dp))
+                    .clickable {
+                        val planText = if (selectedPlan == "M") "月度 ¥6.8" else "永久 ¥159"
+                        val content = "小脚印 Pro 激活申请\n设备 ID：$deviceId\n套餐：$planText\n回执邮箱：____（填你的邮箱）\n已付款，请回复激活码，谢谢！"
+                        val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        cm.setPrimaryClip(ClipData.newPlainText("licenseApply", content))
+                        copied = true
+                    }
+                    .padding(vertical = 12.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
         }
 
         Column(
@@ -239,7 +300,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
                 .padding(8.dp)
         )
         Text(
-            "扫码付款后，把设备 ID 和你的邮箱发给开发者，激活码会发到你的邮箱。",
+            "流程：扫码付款 → 把「复制申请内容」粘贴到邮件，发到 benyi@aliyun.com → 收到回复的激活码后输入激活。",
             fontSize = 11.sp,
             color = TextSecondary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -248,14 +309,30 @@ fun PurchaseScreen(onBack: () -> Unit) {
 }
 
 @Composable
-private fun PriceCard(title: String, price: String, desc: String, modifier: Modifier = Modifier) {
+private fun PriceCard(
+    title: String,
+    price: String,
+    desc: String,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     Column(
         modifier = modifier
             .padding(horizontal = 16.dp)
-            .background(Card, RoundedCornerShape(18.dp))
+            .background(
+                if (selected) com.xiaojiaoyin.baby.ui.theme.MintLight else Card,
+                RoundedCornerShape(18.dp)
+            )
+            .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
-        Text(title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+        Text(
+            title + if (selected) " ✓" else "",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (selected) Mint else TextSecondary
+        )
         Text(price, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Mint, modifier = Modifier.padding(top = 4.dp))
         Text(desc, fontSize = 11.sp, color = TextSecondary, modifier = Modifier.padding(top = 2.dp))
     }

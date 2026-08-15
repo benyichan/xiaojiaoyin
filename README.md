@@ -45,7 +45,7 @@
 - 数据库 v3：record 增加 updatedAt，保留数据迁移（MIGRATION_2_3）
 - 变现（2026-08-15 定稿）：**付款 + 邮箱激活码**，不走商店 IAP
   - 定价：月度 ¥6.8 / 月，永久买断 ¥159（= 2.5 年月费 ¥204 × 80% = ¥163.2，取末尾 9）
-  - 激活码：HMAC-SHA256 签名 + base32，绑定设备 ID + 到期时间；App 显示设备 ID → 付款发码 → 输入激活
+  - 激活码：HMAC-SHA256 签名 + base32，绑定设备 ID + 到期时间；App 显示设备 ID → 扫码付款 → 邮件申请（benyi@aliyun.com）→ 回复激活码 → 输入激活
   - 卖家端生成工具：`scripts/generate_license.py`；流程说明见 docs/monetization.md
   - Pro 状态与到期时间本地存储（DataStore）
 - 合规包：docs/compliance/ 隐私政策、Google Play 家庭政策清单、国内发布清单
