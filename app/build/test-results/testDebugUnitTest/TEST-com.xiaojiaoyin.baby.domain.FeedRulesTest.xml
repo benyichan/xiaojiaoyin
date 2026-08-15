@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.xiaojiaoyin.baby.domain.FeedRulesTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-08-15T10:03:44.928Z" hostname="本义" time="0.017">
+  <properties/>
+  <testcase name="喂养25个月非活跃_24个月活跃" classname="com.xiaojiaoyin.baby.domain.FeedRulesTest" time="0.004"/>
+  <testcase name="60天无记录自动折叠_近期记录不折叠" classname="com.xiaojiaoyin.baby.domain.FeedRulesTest" time="0.001"/>
+  <testcase name="哭闹36个月边界" classname="com.xiaojiaoyin.baby.domain.FeedRulesTest" time="0.0"/>
+  <testcase name="月龄计算" classname="com.xiaojiaoyin.baby.domain.FeedRulesTest" time="0.011"/>
+  <testcase name="生长永远活跃" classname="com.xiaojiaoyin.baby.domain.FeedRulesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

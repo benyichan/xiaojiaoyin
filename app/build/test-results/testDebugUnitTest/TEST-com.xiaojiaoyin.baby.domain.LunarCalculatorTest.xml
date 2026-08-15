@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.xiaojiaoyin.baby.domain.LunarCalculatorTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-08-15T10:03:44.947Z" hostname="本义" time="0.06">
+  <properties/>
+  <testcase name="腊月出生_农历生日跨年到正月之后" classname="com.xiaojiaoyin.baby.domain.LunarCalculatorTest" time="0.048"/>
+  <testcase name="农历生日倒计时_跨年计算" classname="com.xiaojiaoyin.baby.domain.LunarCalculatorTest" time="0.003"/>
+  <testcase name="2026-05-03 09-24 金牛座属马农历三月十七八字丙午年起" classname="com.xiaojiaoyin.baby.domain.LunarCalculatorTest" time="0.004"/>
+  <testcase name="阳历生日倒计时_生日已过则算到明年" classname="com.xiaojiaoyin.baby.domain.LunarCalculatorTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

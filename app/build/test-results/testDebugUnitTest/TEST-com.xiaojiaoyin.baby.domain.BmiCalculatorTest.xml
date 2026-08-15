@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.xiaojiaoyin.baby.domain.BmiCalculatorTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-08-15T10:03:44.918Z" hostname="本义" time="0.007">
+  <properties/>
+  <testcase name="非法输入抛异常" classname="com.xiaojiaoyin.baby.domain.BmiCalculatorTest" time="0.004"/>
+  <testcase name="过轻与过重评估" classname="com.xiaojiaoyin.baby.domain.BmiCalculatorTest" time="0.0"/>
+  <testcase name="身高62cm体重6-8kg_BMI约17-7" classname="com.xiaojiaoyin.baby.domain.BmiCalculatorTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
