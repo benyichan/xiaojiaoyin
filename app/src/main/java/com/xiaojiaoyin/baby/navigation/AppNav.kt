@@ -1,5 +1,7 @@
 package com.xiaojiaoyin.baby.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -119,12 +121,12 @@ fun AppNav() {
             backStack = backStack,
             onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
             transitionSpec = {
-                slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) togetherWith
-                    slideOutHorizontally(targetOffsetX = { -it / 3 }, animationSpec = tween(300))
+                slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(250)) togetherWith
+                    ExitTransition.None
             },
             popTransitionSpec = {
-                slideInHorizontally(initialOffsetX = { -it / 3 }, animationSpec = tween(300)) togetherWith
-                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
+                EnterTransition.None togetherWith
+                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(250))
             },
             entryProvider = { key ->
                 when (key) {
