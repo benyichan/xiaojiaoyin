@@ -261,7 +261,7 @@ private fun AddTodoForm(
 ) {
     var title by remember(todo) { mutableStateOf(todo?.title ?: "") }
     var timeAt by remember(todo) {
-        mutableStateOf(todo?.timeAt ?: (System.currentTimeMillis() + 24 * 60 * 60 * 1000L))
+        mutableStateOf(todo?.timeAt ?: System.currentTimeMillis())
     }
     var remind by remember(todo) { mutableStateOf(todo?.remindEnabled ?: true) }
     var showTime by remember { mutableStateOf(false) }
@@ -335,6 +335,10 @@ private fun AddTodoForm(
         SaveButton("保存") {
             if (title.isBlank()) {
                 error = "请填写标题"
+                return@SaveButton
+            }
+            if (timeAt <= System.currentTimeMillis()) {
+                error = "提醒时间已过，请选择未来的时间"
                 return@SaveButton
             }
             onSave(title.trim(), timeAt, remind)
