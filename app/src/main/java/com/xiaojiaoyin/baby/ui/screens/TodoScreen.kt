@@ -71,6 +71,7 @@ fun TodoScreen(onBack: () -> Unit) {
     var showAdd by remember { mutableStateOf(false) }
     var showPermissionGuide by remember { mutableStateOf(false) }
     var editingTodo by remember { mutableStateOf<TodoEntity?>(null) }
+    var pendingDelete by remember { mutableStateOf<TodoEntity?>(null) }
 
     fun toggleRemind(todo: TodoEntity, enabled: Boolean) {
         scope.launch {
@@ -126,11 +127,8 @@ fun TodoScreen(onBack: () -> Unit) {
                 val dismissState = rememberSwipeToDismissBoxState(
                     confirmValueChange = { value ->
                         if (value == SwipeToDismissBoxValue.EndToStart) {
-                            scope.launch {
-                                AppGraph.todoRepository.delete(todo)
-                                scheduler.cancel(todo.id)
-                            }
-                            true
+                            pendingDelete = todo
+                            false
                         } else false
                     }
                 )
@@ -247,6 +245,26 @@ fun TodoScreen(onBack: () -> Unit) {
             },
             dismissButton = {
                 TextButton(onClick = { showPermissionGuide = false }) { Text("稍后") }
+            }
+        )
+    }
+
+    pendingDelete?.let { target ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("删除待办", fontWeight = FontWeight.Bold) },
+            text = { Text("确定删除「${target.title}」？删除后提醒也会取消。") },
+            confirmButton = {
+                TextButton(onClick = {
+                    scope.launch {
+                        AppGraph.todoRepository.delete(target)
+                        scheduler.cancel(target.id)
+                    }
+                    pendingDelete = null
+                }) { Text("删除", color = Color(0xFFD96A6A)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDelete = null }) { Text("取消") }
             }
         )
     }
