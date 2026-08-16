@@ -1,6 +1,8 @@
 package com.xiaojiaoyin.baby.ui.screens
 
 import android.graphics.BitmapFactory
+import android.content.Intent
+import androidx.core.content.FileProvider
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -266,6 +268,7 @@ private fun PhotoPreviewDialog(
     onSaveNote: (String) -> Unit
 ) {
     var note by remember(record.id) { mutableStateOf(record.note) }
+    val shareContext = context
     val path = record.detailJsonPath()
     val bitmap = remember(record.id) {
         if (path.isBlank()) null
@@ -306,7 +309,25 @@ private fun PhotoPreviewDialog(
             TextButton(onClick = { onSaveNote(note) }) { Text("保存备注") }
         },
         dismissButton = {
-            TextButton(onClick = onDelete) { Text("删除", color = Color(0xFFD96A6A)) }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = {
+                    if (path.isNotBlank()) {
+                        val file = PhotoStorage.loadFile(shareContext, path)
+                        val uri = FileProvider.getUriForFile(
+                            shareContext,
+                            "${shareContext.packageName}.fileprovider",
+                            file
+                        )
+                        val share = Intent(Intent.ACTION_SEND).apply {
+                            type = "image/*"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        shareContext.startActivity(Intent.createChooser(share, "分享照片"))
+                    }
+                }) { Text("分享", color = Mint) }
+                TextButton(onClick = onDelete) { Text("删除", color = Color(0xFFD96A6A)) }
+            }
         }
     )
 }

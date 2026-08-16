@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -47,7 +48,7 @@ import java.time.Instant
 import java.time.ZoneId
 
 @Composable
-fun GrowthScreen(onAddNode: () -> Unit) {
+fun GrowthScreen(onAddNode: () -> Unit, onEditNode: (Long) -> Unit) {
     val scope = rememberCoroutineScope()
     val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val nodes by remember(babyId) {
@@ -111,7 +112,7 @@ fun GrowthScreen(onAddNode: () -> Unit) {
 
         if (grouped.isEmpty()) {
             Text(
-                text = if (nodes.isEmpty()) "还没有重要节点，记下第一次翻身、第一次笑吧" else "没有匹配的节点",
+                text = if (nodes.isEmpty()) "还没有成长节点，记下第一次翻身、第一次笑吧" else "没有匹配的节点",
                 fontSize = 13.sp,
                 color = TextSecondary,
                 modifier = Modifier.padding(16.dp)
@@ -168,10 +169,16 @@ fun GrowthScreen(onAddNode: () -> Unit) {
                 TextButton(onClick = { previewId = null }) { Text("关闭") }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    scope.launch { AppGraph.recordRepository.delete(previewNode) }
-                    previewId = null
-                }) { Text("删除", color = Color(0xFFD96A6A)) }
+                Row {
+                    TextButton(onClick = {
+                        onEditNode(previewNode.id)
+                        previewId = null
+                    }) { Text("编辑", color = Mint) }
+                    TextButton(onClick = {
+                        scope.launch { AppGraph.recordRepository.delete(previewNode) }
+                        previewId = null
+                    }) { Text("删除", color = Color(0xFFD96A6A)) }
+                }
             }
         )
     }
@@ -197,9 +204,17 @@ private fun NodeTimelineItem(node: RecordEntity, onClick: () -> Unit) {
                 .padding(start = 12.dp, bottom = 8.dp)
                 .background(Card, RoundedCornerShape(18.dp))
                 .clickable(onClick = onClick)
+                .height(96.dp)
                 .padding(14.dp)
         ) {
-            Text(node.title(), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+            Text(
+                node.title(),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
             Text(
                 text = "${monthLabel(node.occurredAt)} ${timeLabel(node.occurredAt)}",
                 fontSize = 11.sp,
@@ -211,19 +226,11 @@ private fun NodeTimelineItem(node: RecordEntity, onClick: () -> Unit) {
                     text = node.note,
                     fontSize = 12.sp,
                     color = TextPrimary.copy(alpha = 0.75f),
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 6.dp)
                 )
             }
-            Text(
-                text = "⭐ 重要",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = Gold,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .background(GoldLight, RoundedCornerShape(9.dp))
-                    .padding(horizontal = 8.dp, vertical = 3.dp)
-            )
         }
     }
 }

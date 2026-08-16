@@ -3,6 +3,7 @@ package com.xiaojiaoyin.baby.data
 import android.content.Context
 import com.xiaojiaoyin.baby.data.db.AppDatabase
 import com.xiaojiaoyin.baby.data.repository.BabyRepository
+import com.xiaojiaoyin.baby.data.repository.BabyCustomFieldRepository
 import com.xiaojiaoyin.baby.data.repository.GoodItemRepository
 import com.xiaojiaoyin.baby.data.repository.RecordRepository
 import com.xiaojiaoyin.baby.data.repository.SchoolStageRepository
@@ -23,6 +24,8 @@ object AppGraph {
         private set
     lateinit var goodItemRepository: GoodItemRepository
         private set
+    lateinit var babyCustomFieldRepository: BabyCustomFieldRepository
+        private set
     lateinit var settingsRepository: SettingsRepository
         private set
     lateinit var proStatusRepository: ProStatusRepository
@@ -36,6 +39,7 @@ object AppGraph {
         todoRepository = TodoRepository(database.todoDao())
         schoolStageRepository = SchoolStageRepository(database.schoolStageDao())
         goodItemRepository = GoodItemRepository(database.goodItemDao())
+        babyCustomFieldRepository = BabyCustomFieldRepository(database.babyCustomFieldDao())
         settingsRepository = SettingsRepository(context.applicationContext)
         proStatusRepository = ProStatusRepository(context.applicationContext)
     }

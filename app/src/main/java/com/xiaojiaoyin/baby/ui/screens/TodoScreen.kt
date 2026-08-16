@@ -14,11 +14,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDialog
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -63,6 +70,7 @@ fun TodoScreen(onBack: () -> Unit) {
     val scheduler = remember { ReminderScheduler(context.applicationContext) }
     var showAdd by remember { mutableStateOf(false) }
     var showPermissionGuide by remember { mutableStateOf(false) }
+    var editingTodo by remember { mutableStateOf<TodoEntity?>(null) }
 
     fun toggleRemind(todo: TodoEntity, enabled: Boolean) {
         scope.launch {
@@ -70,9 +78,8 @@ fun TodoScreen(onBack: () -> Unit) {
             AppGraph.todoRepository.update(updated)
             if (enabled) {
                 ReminderPermissionHelper.requestNotificationPermission(context as? ComponentActivity ?: return@launch)
-                if (ReminderPermissionHelper.canScheduleExact(context)) {
-                    scheduler.schedule(updated)
-                } else {
+                scheduler.schedule(updated)
+                if (!ReminderPermissionHelper.canScheduleExact(context)) {
                     showPermissionGuide = true
                 }
             } else {
@@ -116,63 +123,106 @@ fun TodoScreen(onBack: () -> Unit) {
             )
         } else {
             todos.forEach { todo ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 5.dp)
-                        .background(Card, RoundedCornerShape(18.dp))
-                        .clickable { toggleDone(todo) }
-                        .padding(13.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                val dismissState = rememberSwipeToDismissBoxState(
+                    confirmValueChange = { value ->
+                        if (value == SwipeToDismissBoxValue.EndToStart) {
+                            scope.launch {
+                                AppGraph.todoRepository.delete(todo)
+                                scheduler.cancel(todo.id)
+                            }
+                            true
+                        } else false
+                    }
+                )
+                SwipeToDismissBox(
+                    state = dismissState,
+                    enableDismissFromStartToEnd = false,
+                    backgroundContent = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFFD96A6A), RoundedCornerShape(18.dp)),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Text("删除", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 24.dp))
+                        }
+                    }
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = todo.title,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (todo.completed) TextSecondary else androidx.compose.ui.graphics.Color(0xFF2F463D),
-                            textDecoration = if (todo.completed) androidx.compose.ui.text.style.TextDecoration.LineThrough else null
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 5.dp)
+                            .background(Card, RoundedCornerShape(18.dp))
+                            .clickable { editingTodo = todo }
+                            .padding(13.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = todo.completed,
+                            onCheckedChange = { toggleDone(todo) }
                         )
-                        Text(
-                            text = formatTodoTime(todo.timeAt),
-                            fontSize = 11.sp,
-                            color = TextSecondary,
-                            modifier = Modifier.padding(top = 3.dp)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = todo.title,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (todo.completed) TextSecondary else androidx.compose.ui.graphics.Color(0xFF2F463D),
+                                textDecoration = if (todo.completed) androidx.compose.ui.text.style.TextDecoration.LineThrough else null
+                            )
+                            Text(
+                                text = formatTodoTime(todo.timeAt),
+                                fontSize = 11.sp,
+                                color = TextSecondary,
+                                modifier = Modifier.padding(top = 3.dp)
+                            )
+                        }
+                        Switch(
+                            checked = todo.remindEnabled,
+                            onCheckedChange = { toggleRemind(todo, it) }
                         )
                     }
-                    Switch(
-                        checked = todo.remindEnabled,
-                        onCheckedChange = { toggleRemind(todo, it) }
-                    )
                 }
             }
         }
     }
 
-    if (showAdd) {
+    if (showAdd || editingTodo != null) {
         AddTodoForm(
+            todo = editingTodo,
             onBack = { showAdd = false },
             onSave = { title, timeAt, remind ->
                 scope.launch {
-                    val id = AppGraph.todoRepository.add(
-                        babyId = babyId ?: 0L,
-                        title = title,
-                        timeAt = timeAt,
-                        remindEnabled = remind
-                    )
-                    if (remind) {
-                        scheduler.schedule(
-                            TodoEntity(
-                                id = id,
-                                babyId = babyId ?: 0L,
-                                title = title,
-                                timeAt = timeAt,
-                                remindEnabled = true,
-                                createdAt = System.currentTimeMillis()
-                            )
+                    if (editingTodo != null) {
+                        val updated = editingTodo!!.copy(
+                            title = title,
+                            timeAt = timeAt,
+                            remindEnabled = remind
                         )
+                        AppGraph.todoRepository.update(updated)
+                        scheduler.cancel(updated.id)
+                        if (remind) scheduler.schedule(updated)
+                    } else {
+                        val id = AppGraph.todoRepository.add(
+                            babyId = babyId ?: 0L,
+                            title = title,
+                            timeAt = timeAt,
+                            remindEnabled = remind
+                        )
+                        if (remind) {
+                            scheduler.schedule(
+                                TodoEntity(
+                                    id = id,
+                                    babyId = babyId ?: 0L,
+                                    title = title,
+                                    timeAt = timeAt,
+                                    remindEnabled = true,
+                                    createdAt = System.currentTimeMillis()
+                                )
+                            )
+                        }
                     }
                     showAdd = false
+                    editingTodo = null
                 }
             }
         )
@@ -205,24 +255,51 @@ fun TodoScreen(onBack: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddTodoForm(
+    todo: TodoEntity?,
     onBack: () -> Unit,
     onSave: (title: String, timeAt: Long, remind: Boolean) -> Unit
 ) {
-    var title by remember { mutableStateOf("") }
-    var timeAt by remember { mutableStateOf(System.currentTimeMillis() + 24 * 60 * 60 * 1000L) }
-    var remind by remember { mutableStateOf(true) }
+    var title by remember(todo) { mutableStateOf(todo?.title ?: "") }
+    var timeAt by remember(todo) {
+        mutableStateOf(todo?.timeAt ?: (System.currentTimeMillis() + 24 * 60 * 60 * 1000L))
+    }
+    var remind by remember(todo) { mutableStateOf(todo?.remindEnabled ?: true) }
     var showTime by remember { mutableStateOf(false) }
+    var showDate by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val zone = ZoneId.of("Asia/Shanghai")
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(com.xiaojiaoyin.baby.ui.theme.Bg)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(bottom = 30.dp)
     ) {
-        OverlayHeader("新建待办", onBack)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Mint, RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+                .padding(horizontal = 16.dp, vertical = 18.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "‹ 返回",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    modifier = Modifier.clickable(onClick = onBack)
+                )
+                Text(
+                    if (todo == null) "新建待办" else "编辑待办",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White,
+                    modifier = Modifier.padding(start = 14.dp)
+                )
+            }
+        }
         TextInputField(
             label = "标题 *",
             value = title,
@@ -235,10 +312,18 @@ private fun AddTodoForm(
                 .format(DateTimeFormatter.ofPattern("MM-dd HH:mm")),
             onClick = { showTime = true }
         )
+        FormField(
+            label = "提醒日期",
+            value = Instant.ofEpochMilli(timeAt).atZone(zone)
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            onClick = { showDate = true }
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .background(Card, RoundedCornerShape(16.dp))
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("到点提醒", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
@@ -272,6 +357,26 @@ private fun AddTodoForm(
             dismissButton = { TextButton(onClick = { showTime = false }) { Text("取消") } }
         ) {
             TimePicker(state = timeState)
+        }
+    }
+
+    if (showDate) {
+        val dateState = rememberDatePickerState(initialSelectedDateMillis = timeAt)
+        DatePickerDialog(
+            onDismissRequest = { showDate = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    dateState.selectedDateMillis?.let { selected ->
+                        val date = Instant.ofEpochMilli(selected).atZone(zone).toLocalDate()
+                        val old = Instant.ofEpochMilli(timeAt).atZone(zone)
+                        timeAt = date.atTime(old.hour, old.minute).atZone(zone).toInstant().toEpochMilli()
+                    }
+                    showDate = false
+                }) { Text("确定") }
+            },
+            dismissButton = { TextButton(onClick = { showDate = false }) { Text("取消") } }
+        ) {
+            DatePicker(state = dateState)
         }
     }
 }

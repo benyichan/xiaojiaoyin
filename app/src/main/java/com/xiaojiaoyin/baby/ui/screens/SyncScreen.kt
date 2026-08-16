@@ -1,5 +1,8 @@
 package com.xiaojiaoyin.baby.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -42,6 +45,8 @@ import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
+import java.net.Inet4Address
+import java.net.NetworkInterface
 import kotlinx.coroutines.launch
 
 @Composable
@@ -73,6 +78,8 @@ fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
     var targetIp by remember { mutableStateOf("") }
     var targetPort by remember { mutableStateOf("") }
     var result by remember { mutableStateOf<String?>(null) }
+    val localIp = remember { getLocalIpAddress() }
+    var ipCopied by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
@@ -120,6 +127,33 @@ fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
         )
 
+        if (localIp != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .background(Card, RoundedCornerShape(14.dp))
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("本机 IP", fontSize = 12.sp, color = TextSecondary, modifier = Modifier.weight(1f))
+                Text(localIp, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text(
+                    if (ipCopied) "已复制" else "复制",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Mint,
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .clickable {
+                            val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            cm.setPrimaryClip(ClipData.newPlainText("localIp", localIp))
+                            ipCopied = true
+                        }
+                )
+            }
+        }
+
         SyncAction(
             title = "开始接收（等待对方连接）",
             desc = "本机作为接收方，显示端口后让另一台连接",
@@ -162,7 +196,7 @@ fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
             TextField(
                 value = targetIp,
                 onValueChange = { targetIp = it },
-                placeholder = { Text("对方 IP", fontSize = 13.sp, color = TextSecondary) },
+                placeholder = { Text("对方 IP（同一 Wi-Fi）", fontSize = 13.sp, color = TextSecondary) },
                 singleLine = true,
                 shape = RoundedCornerShape(14.dp),
                 colors = TextFieldDefaults.colors(
@@ -247,6 +281,28 @@ fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
             color = TextSecondary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
         )
+        Text(
+            "怎么填对方 IP：让对方在「共享同步」页点「开始接收」，然后看对方手机顶部的「本机 IP」是多少，把那个地址填到上面。两台手机必须连同一个 Wi-Fi。",
+            fontSize = 11.sp,
+            color = TextSecondary,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+        )
+    }
+}
+
+private fun getLocalIpAddress(): String? {
+    return try {
+        NetworkInterface.getNetworkInterfaces()?.toList()?.forEach { ni ->
+            if (!ni.isUp || ni.isLoopback) return@forEach
+            ni.inetAddresses.toList().forEach { addr ->
+                if (addr is Inet4Address && !addr.isLoopbackAddress) {
+                    return addr.hostAddress
+                }
+            }
+        }
+        null
+    } catch (e: Exception) {
+        null
     }
 }
 

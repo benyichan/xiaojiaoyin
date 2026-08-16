@@ -70,6 +70,8 @@ object ReminderPermissionHelper {
                 "OPPO/一加/realme 手机：请在「设置 → 应用 → 小脚印 → 允许自启动」中开启，并允许后台运行。"
             manufacturer.contains("vivo") || manufacturer.contains("iqoo") ->
                 "vivo/iQOO 手机：请在「i管家 → 应用管理 → 权限管理 → 自启动」中允许小脚印自启动。"
+            manufacturer.contains("meizu") ->
+                "魅族手机：请在「设置 → 应用管理 → 小脚印 → 权限管理」允许通知与自启动，并到「手机管家 → 应用管理 → 小脚印」允许后台运行，否则提醒可能被拦截。"
             else -> null
         }
     }

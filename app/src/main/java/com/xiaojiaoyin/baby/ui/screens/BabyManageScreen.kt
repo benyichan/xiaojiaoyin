@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 fun BabyManageScreen(
     onBack: () -> Unit,
     onEdit: (Long) -> Unit,
+    onDetail: (Long) -> Unit,
     onAdd: () -> Unit,
     onUpgrade: () -> Unit
 ) {
@@ -136,6 +137,15 @@ fun BabyManageScreen(
                                 .padding(horizontal = 8.dp, vertical = 3.dp)
                         )
                     }
+                    Text(
+                        "详情",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Gold,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .clickable { onDetail(baby.id) }
+                    )
                     Text(
                         "编辑",
                         fontSize = 12.sp,

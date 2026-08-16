@@ -7,11 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.xiaojiaoyin.baby.data.db.dao.BabyDao
+import com.xiaojiaoyin.baby.data.db.dao.BabyCustomFieldDao
 import com.xiaojiaoyin.baby.data.db.dao.GoodItemDao
 import com.xiaojiaoyin.baby.data.db.dao.RecordDao
 import com.xiaojiaoyin.baby.data.db.dao.SchoolStageDao
 import com.xiaojiaoyin.baby.data.db.dao.TodoDao
 import com.xiaojiaoyin.baby.data.db.entity.BabyEntity
+import com.xiaojiaoyin.baby.data.db.entity.BabyCustomFieldEntity
 import com.xiaojiaoyin.baby.data.db.entity.GoodItemEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordEntity
 import com.xiaojiaoyin.baby.data.db.entity.SchoolStageEntity
@@ -23,9 +25,10 @@ import com.xiaojiaoyin.baby.data.db.entity.TodoEntity
         RecordEntity::class,
         TodoEntity::class,
         SchoolStageEntity::class,
-        GoodItemEntity::class
+        GoodItemEntity::class,
+        BabyCustomFieldEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -34,6 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun todoDao(): TodoDao
     abstract fun schoolStageDao(): SchoolStageDao
     abstract fun goodItemDao(): GoodItemDao
+    abstract fun babyCustomFieldDao(): BabyCustomFieldDao
 
     companion object {
         const val NAME = "baby-app.db"
@@ -48,7 +52,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                     .also { instance = it }
             }
@@ -93,6 +97,19 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE good_item ADD COLUMN priceYuan REAL NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE good_item ADD COLUMN buyDate INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE school_stage ADD COLUMN costYuan REAL NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `baby_custom_field` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`babyId` INTEGER NOT NULL, " +
+                        "`fieldKey` TEXT NOT NULL, " +
+                        "`fieldValue` TEXT NOT NULL, " +
+                        "`createdAt` INTEGER NOT NULL)"
+                )
             }
         }
 

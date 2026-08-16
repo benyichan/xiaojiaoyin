@@ -34,6 +34,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.data.db.entity.RecordEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordType
+import com.xiaojiaoyin.baby.data.db.entity.TodoEntity
+import com.xiaojiaoyin.baby.domain.StatsCalculator
 import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Gold
 import com.xiaojiaoyin.baby.ui.theme.Mint
@@ -64,9 +66,17 @@ fun StatsScreen(onOpenChart: () -> Unit, onUpgrade: () -> Unit) {
         if (babyId == null) flowOf(emptyList<RecordEntity>())
         else AppGraph.recordRepository.observeAll(babyId!!)
     }.collectAsStateWithLifecycle(initialValue = emptyList())
+    val todos by remember(babyId) {
+        if (babyId == null) flowOf(emptyList<TodoEntity>())
+        else AppGraph.todoRepository.observeAll(babyId!!)
+    }.collectAsStateWithLifecycle(initialValue = emptyList())
 
-    val feedingByDay = lastNDaysFeeding(records, days = 14)
+    val feedingByDay = lastNDaysFeeding(records, days = 30)
     val cryingReasons = cryingReasonDistribution(records)
+    val overview = StatsCalculator.monthlyOverview(records, System.currentTimeMillis())
+    val feedingRatio = StatsCalculator.feedingTypeRatio(records)
+    val cryingBuckets = StatsCalculator.cryingTimeBuckets(records)
+    val (todoDone, todoTotal) = StatsCalculator.todoCompletion(todos)
 
     Column(
         modifier = Modifier
@@ -95,17 +105,83 @@ fun StatsScreen(onOpenChart: () -> Unit, onUpgrade: () -> Unit) {
             }
         }
 
-        StatCard(title = "喂养统计", desc = "最近 14 天每日记录次数") {
+        StatCard(title = "喂养统计", desc = "近 30 天每日记录次数") {
             if (feedingByDay.maxOrNull() == 0) {
                 Text("暂无喂养记录", fontSize = 12.sp, color = TextSecondary)
             } else {
                 BarChart(values = feedingByDay, modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp))
+                    .height(100.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    Text("-14 天", fontSize = 10.sp, color = TextSecondary, modifier = Modifier.weight(1f))
+                    Text("-30 天", fontSize = 10.sp, color = TextSecondary, modifier = Modifier.weight(1f))
                     Text("今天", fontSize = 10.sp, color = TextSecondary)
                 }
+            }
+        }
+
+        StatCard(title = "月度概览", desc = "本月成长记录") {
+            if (overview.total == 0) {
+                Text("本月还没有记录", fontSize = 12.sp, color = TextSecondary)
+            } else {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    OverviewCell("记录", overview.total.toString(), Modifier.weight(1f))
+                    OverviewCell("喂养", overview.feeding.toString(), Modifier.weight(1f))
+                    OverviewCell("哭闹", overview.crying.toString(), Modifier.weight(1f))
+                    OverviewCell("生长", overview.growth.toString(), Modifier.weight(1f))
+                    OverviewCell("节点", overview.nodes.toString(), Modifier.weight(1f))
+                }
+            }
+        }
+
+        StatCard(title = "喂养类型占比", desc = "母乳 / 奶粉 / 辅食") {
+            val ratioTotal = feedingRatio.values.sum()
+            if (ratioTotal == 0) {
+                Text("暂无喂养记录", fontSize = 12.sp, color = TextSecondary)
+            } else {
+                feedingRatio.forEach { (kind, count) ->
+                    if (count > 0) {
+                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
+                            Text(kind, fontSize = 12.sp, color = TextPrimary, modifier = Modifier.weight(1f))
+                            Text("$count 次 · ${count * 100 / ratioTotal}%", fontSize = 11.sp, color = TextSecondary)
+                        }
+                    }
+                }
+            }
+        }
+
+        StatCard(title = "哭闹时段", desc = "按 3 小时时段分布") {
+            val bucketSum = cryingBuckets.sum()
+            if (bucketSum == 0) {
+                Text("暂无哭闹记录", fontSize = 12.sp, color = TextSecondary)
+            } else {
+                val maxBucket = cryingBuckets.maxOrNull() ?: 1
+                cryingBuckets.forEachIndexed { i, count ->
+                    if (count > 0) {
+                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
+                            Text("${i * 3}:00-${i * 3 + 2}:59", fontSize = 11.sp, color = TextSecondary, modifier = Modifier.weight(1f))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(count.toFloat() / maxBucket.coerceAtLeast(1))
+                                    .background(Mint.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                                    .height(10.dp)
+                            )
+                            Text("$count", fontSize = 11.sp, color = TextSecondary, modifier = Modifier.padding(start = 6.dp))
+                        }
+                    }
+                }
+            }
+        }
+
+        StatCard(title = "待办完成率", desc = "已完成 / 全部待办") {
+            if (todoTotal == 0) {
+                Text("暂无待办", fontSize = 12.sp, color = TextSecondary)
+            } else {
+                Text(
+                    "$todoDone / $todoTotal · ${todoDone * 100 / todoTotal}%",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Mint
+                )
             }
         }
 
@@ -132,6 +208,14 @@ fun StatsScreen(onOpenChart: () -> Unit, onUpgrade: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun OverviewCell(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = TextPrimary)
+        Text(label, fontSize = 10.sp, color = TextSecondary)
     }
 }
 

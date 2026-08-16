@@ -11,14 +11,21 @@ class ReminderScheduler(private val context: Context) {
 
     fun schedule(todo: TodoEntity) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (Build.VERSION.SDK_INT >= 31 && !alarmManager.canScheduleExactAlarms()) return
-
         val pendingIntent = buildPendingIntent(todo.id, todo.title)
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            todo.timeAt,
-            pendingIntent
-        )
+        val canExact = Build.VERSION.SDK_INT < 31 || alarmManager.canScheduleExactAlarms()
+        if (canExact) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                todo.timeAt,
+                pendingIntent
+            )
+        } else {
+            // 精确闹钟权限不可用时用 setAlarmClock 兜底：闹钟语义必达，无需 SCHEDULE_EXACT_ALARM
+            alarmManager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(todo.timeAt, pendingIntent),
+                pendingIntent
+            )
+        }
     }
 
     fun cancel(todoId: Long) {

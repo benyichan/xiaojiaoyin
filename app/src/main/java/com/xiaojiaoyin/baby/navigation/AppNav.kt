@@ -25,6 +25,7 @@ import com.xiaojiaoyin.baby.ui.screens.AlbumScreen
 import com.xiaojiaoyin.baby.ui.screens.AnnivScreen
 import com.xiaojiaoyin.baby.ui.screens.AboutScreen
 import com.xiaojiaoyin.baby.ui.screens.BabyManageScreen
+import com.xiaojiaoyin.baby.ui.screens.BabyDetailScreen
 import com.xiaojiaoyin.baby.ui.screens.BackupScreen
 import com.xiaojiaoyin.baby.ui.screens.BabyEditScreen
 import com.xiaojiaoyin.baby.ui.screens.CryingZoneScreen
@@ -66,7 +67,7 @@ sealed interface Route {
     data object GrowthForm : Route
     data object Todo : Route
     data object Backup : Route
-    data object NodeForm : Route
+    data class NodeForm(val nodeId: Long? = null) : Route
     data object GrowthChart : Route
     data object Medical : Route
     data object MedicalForm : Route
@@ -83,6 +84,7 @@ sealed interface Route {
     data object About : Route
     data object Privacy : Route
     data object ReminderSettings : Route
+    data class BabyDetail(val babyId: Long) : Route
 }
 
 private val TABS = listOf(
@@ -128,7 +130,10 @@ fun AppNav() {
                         )
                     }
                     Route.Growth -> NavEntry(key) {
-                        GrowthScreen(onAddNode = { backStack.add(Route.NodeForm) })
+                        GrowthScreen(
+                            onAddNode = { backStack.add(Route.NodeForm(null)) },
+                            onEditNode = { id -> backStack.add(Route.NodeForm(id)) }
+                        )
                     }
                     Route.Album -> NavEntry(key) {
                         AlbumScreen(onUpgrade = { backStack.add(Route.Purchase) })
@@ -165,7 +170,9 @@ fun AppNav() {
                     Route.GrowthForm -> NavEntry(key) { GrowthFormScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Todo -> NavEntry(key) { TodoScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Backup -> NavEntry(key) { BackupScreen(onBack = { backStack.removeLastOrNull() }) }
-                    Route.NodeForm -> NavEntry(key) { NodeFormScreen(onBack = { backStack.removeLastOrNull() }) }
+                    is Route.NodeForm -> NavEntry(key) {
+                        NodeFormScreen(nodeId = key.nodeId, onBack = { backStack.removeLastOrNull() })
+                    }
                     Route.GrowthChart -> NavEntry(key) {
                         GrowthChartScreen(
                             onBack = { backStack.removeLastOrNull() },
@@ -225,6 +232,7 @@ fun AppNav() {
                         BabyManageScreen(
                             onBack = { backStack.removeLastOrNull() },
                             onEdit = { id -> backStack.add(Route.EditBaby(id)) },
+                            onDetail = { id -> backStack.add(Route.BabyDetail(id)) },
                             onAdd = { backStack.add(Route.EditBaby(null)) },
                             onUpgrade = { backStack.add(Route.Purchase) }
                         )
@@ -232,6 +240,9 @@ fun AppNav() {
                     Route.About -> NavEntry(key) { AboutScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Privacy -> NavEntry(key) { PrivacyPolicyScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.ReminderSettings -> NavEntry(key) { ReminderSettingsScreen(onBack = { backStack.removeLastOrNull() }) }
+                    is Route.BabyDetail -> NavEntry(key) {
+                        BabyDetailScreen(babyId = key.babyId, onBack = { backStack.removeLastOrNull() })
+                    }
                     else -> NavEntry(key) { Text("未实现页面") }
                 }
             }

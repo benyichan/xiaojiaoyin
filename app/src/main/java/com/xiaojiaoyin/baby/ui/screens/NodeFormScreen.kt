@@ -21,6 +21,7 @@ import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +40,7 @@ import com.xiaojiaoyin.baby.ui.components.OverlayHeader
 import com.xiaojiaoyin.baby.ui.components.TextInputField
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
@@ -46,8 +48,9 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NodeFormScreen(onBack: () -> Unit) {
+fun NodeFormScreen(nodeId: Long?, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
+    var editingNode by remember { mutableStateOf<com.xiaojiaoyin.baby.data.db.entity.RecordEntity?>(null) }
     var title by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var timeAt by remember { mutableStateOf(System.currentTimeMillis()) }
@@ -56,6 +59,21 @@ fun NodeFormScreen(onBack: () -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     val zone = ZoneId.of("Asia/Shanghai")
 
+    LaunchedEffect(nodeId) {
+        if (nodeId != null) {
+            val node = AppGraph.recordRepository.observeByType(
+                AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository) ?: return@LaunchedEffect,
+                com.xiaojiaoyin.baby.data.db.entity.RecordType.NODE
+            ).first().firstOrNull { it.id == nodeId }
+            if (node != null) {
+                editingNode = node
+                title = node.title()
+                note = node.note
+                timeAt = node.occurredAt
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -63,7 +81,7 @@ fun NodeFormScreen(onBack: () -> Unit) {
             .verticalScroll(rememberScrollState())
             .padding(bottom = 30.dp)
     ) {
-        OverlayHeader("记录重要节点", onBack)
+        OverlayHeader(if (nodeId == null) "记录成长节点" else "编辑节点", onBack)
         TextInputField(
             label = "标题 *",
             value = title,
@@ -102,15 +120,25 @@ fun NodeFormScreen(onBack: () -> Unit) {
                         return@clickable
                     }
                     scope.launch {
-                        val babyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
-                        if (babyId != null) {
-                            AppGraph.recordRepository.add(
-                                babyId = babyId,
-                                type = RecordType.NODE,
-                                occurredAt = timeAt,
-                                detailJson = JSONObject().put("title", title.trim()).toString(),
-                                note = note.trim()
+                        if (editingNode != null) {
+                            AppGraph.recordRepository.updateWithTimestamp(
+                                editingNode!!.copy(
+                                    occurredAt = timeAt,
+                                    note = note.trim(),
+                                    detailJson = JSONObject().put("title", title.trim()).toString()
+                                )
                             )
+                        } else {
+                            val babyId = AppGraph.settingsRepository.resolveCurrentBabyId(AppGraph.babyRepository)
+                            if (babyId != null) {
+                                AppGraph.recordRepository.add(
+                                    babyId = babyId,
+                                    type = RecordType.NODE,
+                                    occurredAt = timeAt,
+                                    detailJson = JSONObject().put("title", title.trim()).toString(),
+                                    note = note.trim()
+                                )
+                            }
                         }
                         onBack()
                     }

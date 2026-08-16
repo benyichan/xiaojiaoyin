@@ -1,6 +1,7 @@
 package com.xiaojiaoyin.baby.sync
 
 import com.xiaojiaoyin.baby.data.db.entity.BabyEntity
+import com.xiaojiaoyin.baby.data.db.entity.BabyCustomFieldEntity
 import com.xiaojiaoyin.baby.data.db.entity.GoodItemEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordEntity
 import com.xiaojiaoyin.baby.data.db.entity.SchoolStageEntity
@@ -123,6 +124,22 @@ object SyncJson {
         rating = o.optInt("rating"),
         note = o.optString("note"),
         buyDate = o.optLong("buyDate"),
+        createdAt = o.optLong("createdAt")
+    )
+
+    fun customFieldToJson(f: BabyCustomFieldEntity): String = JSONObject()
+        .put("id", f.id)
+        .put("babyId", f.babyId)
+        .put("fieldKey", f.fieldKey)
+        .put("fieldValue", f.fieldValue)
+        .put("createdAt", f.createdAt)
+        .toString()
+
+    fun customFieldFromJson(o: JSONObject): BabyCustomFieldEntity = BabyCustomFieldEntity(
+        id = o.optLong("id"),
+        babyId = o.optLong("babyId"),
+        fieldKey = o.optString("fieldKey"),
+        fieldValue = o.optString("fieldValue"),
         createdAt = o.optLong("createdAt")
     )
 }

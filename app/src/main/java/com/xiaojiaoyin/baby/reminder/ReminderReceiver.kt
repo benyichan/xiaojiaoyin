@@ -14,6 +14,7 @@ class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val todoId = intent.getLongExtra(EXTRA_TODO_ID, 0L)
         val title = intent.getStringExtra(EXTRA_TITLE) ?: "待办提醒"
+        android.util.Log.d("Reminder", "onReceive todoId=$todoId title=$title")
         ReminderNotification.show(context, todoId, title)
     }
 }

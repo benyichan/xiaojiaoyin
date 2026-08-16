@@ -24,6 +24,9 @@ class SyncManager {
             db.goodItemDao().getAllAll().forEach {
                 add(SyncChange("good", it.id, it.createdAt, SyncJson.goodToJson(it)))
             }
+            db.babyCustomFieldDao().getAllAll().forEach {
+                add(SyncChange("custom_field", it.id, it.createdAt, SyncJson.customFieldToJson(it)))
+            }
         }
     }
 
@@ -37,6 +40,9 @@ class SyncManager {
                 "todo" -> db.todoDao().upsertAll(list.map { SyncJson.todoFromJson(JSONObject(it.json)) })
                 "school" -> db.schoolStageDao().upsertAll(list.map { SyncJson.schoolFromJson(JSONObject(it.json)) })
                 "good" -> db.goodItemDao().upsertAll(list.map { SyncJson.goodFromJson(JSONObject(it.json)) })
+                "custom_field" -> db.babyCustomFieldDao().upsertAll(
+                    list.map { SyncJson.customFieldFromJson(JSONObject(it.json)) }
+                )
             }
         }
     }
