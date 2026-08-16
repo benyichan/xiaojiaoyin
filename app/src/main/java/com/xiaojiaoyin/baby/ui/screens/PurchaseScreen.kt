@@ -60,18 +60,15 @@ fun PurchaseScreen(onBack: () -> Unit) {
     val deviceId = remember { LicenseManager.deviceId(context) }
     val isPro by AppGraph.proStatusRepository.isPro.collectAsStateWithLifecycle(initialValue = false)
     val expireAt by AppGraph.proStatusRepository.proExpireAt.collectAsStateWithLifecycle(initialValue = 0L)
-    val promoEndAt by AppGraph.proStatusRepository.promoEndAt.collectAsStateWithLifecycle(initialValue = 0L)
     var codeInput by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
     var copied by remember { mutableStateOf(false) }
     var selectedPlan by remember { mutableStateOf("L") }
     var now by remember { mutableStateOf(System.currentTimeMillis()) }
-
-    // 限时促销：首次进入购买页设置 18 小时倒计时
-    LaunchedEffect(promoEndAt) {
-        if (promoEndAt == 0L) {
-            AppGraph.proStatusRepository.setPromoEndAt(System.currentTimeMillis() + 18 * 3600 * 1000L)
-        }
+    // 限时促销：固定截止时间（重装不重置，到期自动结束）
+    val promoEndAt = remember {
+        java.time.ZonedDateTime.of(2026, 9, 15, 23, 59, 59, 0, ZoneId.of("Asia/Shanghai"))
+            .toInstant().toEpochMilli()
     }
     LaunchedEffect(Unit) {
         while (true) {
@@ -386,6 +383,11 @@ private fun PriceCard(
 
 private fun formatCountdown(ms: Long): String {
     val totalSeconds = ms / 1000
+    if (totalSeconds >= 24 * 3600) {
+        val days = totalSeconds / 86400
+        val hours = (totalSeconds % 86400) / 3600
+        return "${days}天${hours}小时"
+    }
     val h = totalSeconds / 3600
     val m = (totalSeconds % 3600) / 60
     val s = totalSeconds % 60
