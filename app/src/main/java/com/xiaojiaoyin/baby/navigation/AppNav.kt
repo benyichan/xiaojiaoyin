@@ -128,6 +128,10 @@ fun AppNav() {
                 EnterTransition.None togetherWith
                     slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(250))
             },
+            predictivePopTransitionSpec = {
+                EnterTransition.None togetherWith
+                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(250))
+            },
             entryProvider = { key ->
                 when (key) {
                     Route.Home -> NavEntry(key) {
