@@ -124,19 +124,16 @@ fun AppNav() {
             backStack = backStack,
             onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
             transitionSpec = {
-                (slideInHorizontally(initialOffsetX = { it / 3 }, animationSpec = tween(320, easing = FastOutSlowInEasing)) +
-                    fadeIn(animationSpec = tween(320, easing = FastOutSlowInEasing))) togetherWith
-                    ExitTransition.None
+                fadeIn(animationSpec = tween(280)) togetherWith
+                    fadeOut(animationSpec = tween(280))
             },
             popTransitionSpec = {
-                EnterTransition.None togetherWith
-                    (slideOutHorizontally(targetOffsetX = { it / 3 }, animationSpec = tween(320, easing = FastOutSlowInEasing)) +
-                        fadeOut(animationSpec = tween(320, easing = FastOutSlowInEasing)))
+                fadeIn(animationSpec = tween(280)) togetherWith
+                    fadeOut(animationSpec = tween(280))
             },
             predictivePopTransitionSpec = {
-                EnterTransition.None togetherWith
-                    (slideOutHorizontally(targetOffsetX = { it / 3 }, animationSpec = tween(320, easing = FastOutSlowInEasing)) +
-                        fadeOut(animationSpec = tween(320, easing = FastOutSlowInEasing)))
+                fadeIn(animationSpec = tween(280)) togetherWith
+                    fadeOut(animationSpec = tween(280))
             },
             entryProvider = { key ->
                 when (key) {
