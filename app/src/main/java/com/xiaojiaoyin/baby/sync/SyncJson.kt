@@ -37,6 +37,8 @@ object SyncJson {
         .put("occurredAt", r.occurredAt)
         .put("detailJson", JSONObject(r.detailJson))
         .put("note", r.note)
+        .put("tags", r.tags)
+        .put("parentId", r.parentId ?: JSONObject.NULL)
         .put("createdAt", r.createdAt)
         .put("updatedAt", r.updatedAt)
         .toString()
@@ -49,6 +51,8 @@ object SyncJson {
         occurredAt = o.optLong("occurredAt"),
         detailJson = o.optJSONObject("detailJson")?.toString() ?: "{}",
         note = o.optString("note"),
+        tags = o.optString("tags"),
+        parentId = if (o.isNull("parentId")) null else o.optLong("parentId"),
         createdAt = o.optLong("createdAt"),
         updatedAt = o.optLong("updatedAt")
     )

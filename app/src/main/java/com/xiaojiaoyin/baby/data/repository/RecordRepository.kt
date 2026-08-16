@@ -14,6 +14,12 @@ class RecordRepository(private val dao: RecordDao) {
     fun observeByType(babyId: Long, type: RecordType): Flow<List<RecordEntity>> =
         dao.observeByType(babyId, type)
 
+    fun observeByParent(parentId: Long): Flow<List<RecordEntity>> =
+        dao.observeByParent(parentId)
+
+    suspend fun getByParent(parentId: Long): List<RecordEntity> =
+        dao.getByParent(parentId)
+
     suspend fun add(
         babyId: Long,
         type: RecordType,
@@ -45,6 +51,27 @@ class RecordRepository(private val dao: RecordDao) {
     /** 更新记录时刷新 updatedAt，供同步合并使用 */
     suspend fun updateWithTimestamp(record: RecordEntity): Unit =
         dao.update(record.copy(updatedAt = System.currentTimeMillis()))
+
+    /** 节点配图：保存为相册照片并自动打「关键时刻」标签 */
+    suspend fun addNodePhoto(
+        babyId: Long,
+        nodeId: Long,
+        path: String,
+        occurredAt: Long,
+        note: String = ""
+    ): Long = dao.insert(
+        RecordEntity(
+            babyId = babyId,
+            type = RecordType.PHOTO,
+            occurredAt = occurredAt,
+            detailJson = org.json.JSONObject().put("path", path).toString(),
+            note = note,
+            tags = com.xiaojiaoyin.baby.data.db.entity.TAG_KEY_MOMENT,
+            parentId = nodeId,
+            createdAt = System.currentTimeMillis(),
+            updatedAt = System.currentTimeMillis()
+        )
+    )
 
     suspend fun addMedical(
         babyId: Long,

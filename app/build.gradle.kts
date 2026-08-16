@@ -59,5 +59,6 @@ dependencies {
     implementation(libs.lunar)
     implementation(libs.billing)
     testImplementation(libs.junit)
+    testImplementation("org.json:json:20240303")
     debugImplementation(libs.compose.ui.tooling)
 }

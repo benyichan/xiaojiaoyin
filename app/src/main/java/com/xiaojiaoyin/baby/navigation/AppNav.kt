@@ -192,7 +192,11 @@ fun AppNav() {
                     Route.Todo -> NavEntry(key) { TodoScreen(onBack = { backStack.removeLastOrNull() }) }
                     Route.Backup -> NavEntry(key) { BackupScreen(onBack = { backStack.removeLastOrNull() }) }
                     is Route.NodeForm -> NavEntry(key) {
-                        NodeFormScreen(nodeId = key.nodeId, onBack = { backStack.removeLastOrNull() })
+                        NodeFormScreen(
+                            nodeId = key.nodeId,
+                            onBack = { backStack.removeLastOrNull() },
+                            onUpgrade = { backStack.add(Route.Purchase) }
+                        )
                     }
                     Route.GrowthChart -> NavEntry(key) {
                         GrowthChartScreen(

@@ -30,6 +30,12 @@ interface RecordDao {
     @Query("SELECT * FROM record WHERE babyId = :babyId AND type = :type ORDER BY occurredAt DESC")
     fun observeByType(babyId: Long, type: RecordType): Flow<List<RecordEntity>>
 
+    @Query("SELECT * FROM record WHERE parentId = :parentId ORDER BY id ASC")
+    fun observeByParent(parentId: Long): Flow<List<RecordEntity>>
+
+    @Query("SELECT * FROM record WHERE parentId = :parentId ORDER BY id ASC")
+    suspend fun getByParent(parentId: Long): List<RecordEntity>
+
     @Query("SELECT * FROM record WHERE babyId = :babyId AND type = :type AND occurredAt >= :since ORDER BY occurredAt DESC")
     suspend fun countByTypeSince(babyId: Long, type: RecordType, since: Long): List<RecordEntity>
 
