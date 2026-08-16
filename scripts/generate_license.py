@@ -6,6 +6,7 @@
   python generate_license.py <deviceId8hex> Y            # 年度，默认到期 = 当前 + 365 天
   python generate_license.py <deviceId8hex> M/Y <unix秒> # 指定到期时间
   python generate_license.py <deviceId8hex> L            # 永久
+  python generate_license.py <流水号8hex> G              # 赠送体验码（不绑定设备，任何设备可用）
 
 示例:
   python generate_license.py A1B2C3D4 L
@@ -46,8 +47,8 @@ def generate(device_hex: str, plan: str, expire: int) -> str:
     device = bytes.fromhex(device_hex)
     if len(device) != 4:
         raise ValueError("deviceId 必须是 8 位十六进制（4 字节）")
-    if plan not in ("M", "Y", "L"):
-        raise ValueError("plan 仅支持 M（月费）、Y（年度）或 L（永久）")
+    if plan not in ("M", "Y", "L", "G"):
+        raise ValueError("plan 仅支持 M（月费）、Y（年度）、L（永久）或 G（赠送体验码）")
     payload = b"XY" + device + plan.encode() + int32_be(expire)
     signature = hmac.new(SECRET, payload, hashlib.sha256).digest()[:4]
     encoded = base32_encode(payload + signature)
@@ -60,7 +61,7 @@ def main() -> None:
         sys.exit(1)
     device_hex = sys.argv[1].upper()
     plan = sys.argv[2].upper()
-    if plan == "L":
+    if plan in ("L", "G"):
         expire = 0
     elif len(sys.argv) >= 4:
         expire = int(sys.argv[3])
@@ -70,9 +71,9 @@ def main() -> None:
         expire = int(time.time()) + 30 * 24 * 3600
     code = generate(device_hex, plan, expire)
     print(f"设备 ID: {device_hex}")
-    plan_name = {"M": "月费", "Y": "年度", "L": "永久"}[plan]
+    plan_name = {"M": "月费", "Y": "年度", "L": "永久", "G": "赠送体验码（不绑定设备）"}[plan]
     print(f"套餐: {plan_name}")
-    if plan != "L":
+    if plan not in ("L", "G"):
         print(f"到期: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(expire))}")
     print(f"激活码: {code}")
 

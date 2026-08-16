@@ -29,6 +29,7 @@ python scripts/generate_license.py <设备ID8位hex> M <unix秒>  # 指定到期
 - 签名 = HMAC-SHA256(payload, 密钥) 前 4 字节
 - 激活码 = base32(payload + 签名)，24 字符，展示为 `XXXX-XXXX-XXXX-XXXX`
 - App 验证：签名校验 → 设备 ID 匹配 → 月费码到期时间未过
+- 赠送体验码（套餐 G）：设备字段为流水号，验证时跳过设备匹配，任何设备均可激活为永久 Pro；仅用于公开赠码
 
 ## 安全说明
 

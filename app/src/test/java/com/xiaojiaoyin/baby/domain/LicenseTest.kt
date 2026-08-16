@@ -1,6 +1,7 @@
 package com.xiaojiaoyin.baby.domain
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -43,6 +44,28 @@ class LicenseTest {
         val code = License.generateCode(deviceId, "L", 0)
         val otherDevice = byteArrayOf(0xAA.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xDD.toByte())
         assertNull(License.verifyCode(code, otherDevice))
+    }
+
+    @Test
+    fun `赠送体验码不绑定设备可在任意设备激活`() {
+        val code = License.generateCode(byteArrayOf(0, 0, 0, 1), "G", 0)
+        val deviceA = byteArrayOf(0x11, 0x22, 0x33, 0x44)
+        val deviceB = byteArrayOf(0xAA.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xDD.toByte())
+        val infoA = License.verifyCode(code, deviceA)
+        val infoB = License.verifyCode(code, deviceB)
+        assertNotNull(infoA)
+        assertEquals("L", infoA!!.plan)
+        assertEquals(0, infoA.expireAt)
+        assertNotNull(infoB)
+        assertEquals("L", infoB!!.plan)
+        assertEquals(0, infoB.expireAt)
+    }
+
+    @Test
+    fun `赠送体验码流水号不同码值不同`() {
+        val c1 = License.generateCode(byteArrayOf(0, 0, 0, 1), "G", 0)
+        val c2 = License.generateCode(byteArrayOf(0, 0, 0, 2), "G", 0)
+        assertNotEquals(c1, c2)
     }
 
     @Test

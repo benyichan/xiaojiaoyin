@@ -138,3 +138,13 @@ gradlew.bat testDebugUnitTest    # 单测
 ```
 
 APK 输出：`app/build/outputs/apk/debug/app-debug.apk`
+
+## 首批体验：3 个永久 Pro 码（不绑定设备）
+
+以下 3 个永久码不绑定设备，任何手机直接输入即可解锁全部 Pro 功能，先到先得：
+
+- `LBMQAA-AAAFDQ-AAAAAA-WLGV7Q`
+- `LBMQAA-AAAJDQ-AAAAAA-ANVGMQ`
+- `LBMQAA-AAANDQ-AAAAAA-BIUGZX`
+
+使用：App → 我的 → 订阅升级 → 粘贴激活码 → 激活（需安装含体验码支持的 v0.1.0 新版 APK）。

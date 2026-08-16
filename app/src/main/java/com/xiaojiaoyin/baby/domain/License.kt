@@ -21,12 +21,14 @@ object License {
     // 正式发布前应更换为随机密钥，并与生成脚本保持一致
     const val SECRET = "xiaojiaoyin-license-v1-2026"
     const val MAGIC = "XY"
+    /** 赠送体验码：不绑定设备，任何设备输入即可激活为永久 Pro */
+    const val PLAN_GIVEAWAY = "G"
 
     private val ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 
     fun generateCode(deviceIdBytes: ByteArray, plan: String, expireAt: Long): String {
         require(deviceIdBytes.size == 4) { "deviceId 必须为 4 字节" }
-        require(plan == "M" || plan == "Y" || plan == "L") { "plan 仅支持 M/Y/L" }
+        require(plan == "M" || plan == "Y" || plan == "L" || plan == "G") { "plan 仅支持 M/Y/L/G" }
         val payload = MAGIC.toByteArray(Charsets.US_ASCII) +
             deviceIdBytes +
             plan.toByteArray(Charsets.US_ASCII) +
@@ -56,13 +58,14 @@ object License {
             payload[1] != MAGIC.toByteArray(Charsets.US_ASCII)[1]
         ) return null
         val codeDevice = payload.copyOfRange(2, 6)
-        if (!codeDevice.contentEquals(deviceIdBytes)) return null
         val plan = payload[6].toInt().toChar().toString()
         val expire = bytesToInt(payload.copyOfRange(7, 11))
-        if (plan != "L" && expire <= System.currentTimeMillis() / 1000) return null
+        if (plan != "L" && plan != "G" && expire <= System.currentTimeMillis() / 1000) return null
+        // 赠送码跳过设备匹配；普通码必须设备 ID 一致
+        if (plan != PLAN_GIVEAWAY && !codeDevice.contentEquals(deviceIdBytes)) return null
         return LicenseInfo(
-            plan = plan,
-            expireAt = if (plan == "L") 0 else expire * 1000L
+            plan = if (plan == "G") "L" else plan,
+            expireAt = if (plan == "L" || plan == "G") 0 else expire * 1000L
         )
     }
 
