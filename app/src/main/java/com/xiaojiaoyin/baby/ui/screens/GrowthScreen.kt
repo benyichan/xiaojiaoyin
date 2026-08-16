@@ -151,7 +151,7 @@ fun GrowthScreen(onAddNode: () -> Unit, onEditNode: (Long) -> Unit) {
             text = {
                 Column {
                     Text(
-                        text = "${monthLabel(previewNode.occurredAt)} ${timeLabel(previewNode.occurredAt)}",
+                        text = detailTimeLabel(previewNode.occurredAt),
                         fontSize = 12.sp,
                         color = TextSecondary
                     )
@@ -216,7 +216,7 @@ private fun NodeTimelineItem(node: RecordEntity, onClick: () -> Unit) {
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
             Text(
-                text = "${monthLabel(node.occurredAt)} ${timeLabel(node.occurredAt)}",
+                text = timeLabel(node.occurredAt),
                 fontSize = 11.sp,
                 color = TextSecondary,
                 modifier = Modifier.padding(top = 4.dp)
@@ -237,4 +237,9 @@ private fun monthLabel(millis: Long): String {
 private fun timeLabel(millis: Long): String {
     val t = Instant.ofEpochMilli(millis).atZone(ZoneId.of("Asia/Shanghai"))
     return "${t.monthValue}月${t.dayOfMonth}日 ${String.format("%02d:%02d", t.hour, t.minute)}"
+}
+
+private fun detailTimeLabel(millis: Long): String {
+    val t = Instant.ofEpochMilli(millis).atZone(ZoneId.of("Asia/Shanghai"))
+    return "${t.year}年${t.monthValue}月${t.dayOfMonth}日 ${String.format("%02d:%02d", t.hour, t.minute)}"
 }
