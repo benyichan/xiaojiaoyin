@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -157,15 +159,37 @@ fun StatsScreen(onOpenChart: () -> Unit, onUpgrade: () -> Unit) {
                 val maxBucket = cryingBuckets.maxOrNull() ?: 1
                 cryingBuckets.forEachIndexed { i, count ->
                     if (count > 0) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-                            Text("${i * 3}:00-${i * 3 + 2}:59", fontSize = 11.sp, color = TextSecondary, modifier = Modifier.weight(1f))
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "${i * 3}-${i * 3 + 2}点",
+                                fontSize = 12.sp,
+                                color = TextSecondary,
+                                modifier = Modifier.width(44.dp)
+                            )
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth(count.toFloat() / maxBucket.coerceAtLeast(1))
-                                    .background(Mint.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                                    .weight(1f)
                                     .height(10.dp)
+                                    .background(Mint.copy(alpha = 0.15f), RoundedCornerShape(5.dp))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(count.toFloat() / maxBucket.coerceAtLeast(1))
+                                        .fillMaxHeight()
+                                        .background(Mint, RoundedCornerShape(5.dp))
+                                )
+                            }
+                            Text(
+                                "$count",
+                                fontSize = 12.sp,
+                                color = TextSecondary,
+                                modifier = Modifier
+                                    .width(28.dp)
+                                    .padding(start = 8.dp)
                             )
-                            Text("$count", fontSize = 11.sp, color = TextSecondary, modifier = Modifier.padding(start = 6.dp))
                         }
                     }
                 }
