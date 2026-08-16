@@ -2,6 +2,12 @@
 
 完全离线的本地宝宝成长记录 Android App。M1：骨架 + 宝宝档案 + 首页动态流 + 备份恢复 + 待办提醒；M2：相册 + 成长时间轴；M3：生长曲线 + 统计看板；M4：医疗/喂养/哭闹专区、学籍、好物、那年今日；M5：共享同步 + 订阅变现 + 上架合规包。
 
+## 产品宣传图
+
+![小脚印产品宣传图](images/promo.png)
+
+可编辑 SVG 源文件：[images/promo.svg](images/promo.svg)，可导入 Figma 继续编辑。
+
 ## 技术栈
 
 - Kotlin 2.2.21 + Jetpack Compose + Material 3
