@@ -135,16 +135,7 @@ fun TodoScreen(onBack: () -> Unit) {
                 SwipeToDismissBox(
                     state = dismissState,
                     enableDismissFromStartToEnd = false,
-                    backgroundContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0xFFF2EFEF), RoundedCornerShape(18.dp)),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Text("删除", color = TextSecondary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(end = 24.dp))
-                        }
-                    }
+                    backgroundContent = { Box(Modifier.fillMaxSize()) }
                 ) {
                     Row(
                         modifier = Modifier
