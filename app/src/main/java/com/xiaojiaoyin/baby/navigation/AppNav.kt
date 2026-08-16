@@ -2,7 +2,10 @@ package com.xiaojiaoyin.baby.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -121,16 +124,19 @@ fun AppNav() {
             backStack = backStack,
             onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
             transitionSpec = {
-                slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(250)) togetherWith
+                (slideInHorizontally(initialOffsetX = { it / 3 }, animationSpec = tween(320, easing = FastOutSlowInEasing)) +
+                    fadeIn(animationSpec = tween(320, easing = FastOutSlowInEasing))) togetherWith
                     ExitTransition.None
             },
             popTransitionSpec = {
                 EnterTransition.None togetherWith
-                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(250))
+                    (slideOutHorizontally(targetOffsetX = { it / 3 }, animationSpec = tween(320, easing = FastOutSlowInEasing)) +
+                        fadeOut(animationSpec = tween(320, easing = FastOutSlowInEasing)))
             },
             predictivePopTransitionSpec = {
                 EnterTransition.None togetherWith
-                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(250))
+                    (slideOutHorizontally(targetOffsetX = { it / 3 }, animationSpec = tween(320, easing = FastOutSlowInEasing)) +
+                        fadeOut(animationSpec = tween(320, easing = FastOutSlowInEasing)))
             },
             entryProvider = { key ->
                 when (key) {
