@@ -1,5 +1,9 @@
 package com.xiaojiaoyin.baby.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -114,6 +118,14 @@ fun AppNav() {
         NavDisplay(
             backStack = backStack,
             onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
+            transitionSpec = {
+                slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) togetherWith
+                    slideOutHorizontally(targetOffsetX = { -it / 3 }, animationSpec = tween(300))
+            },
+            popTransitionSpec = {
+                slideInHorizontally(initialOffsetX = { -it / 3 }, animationSpec = tween(300)) togetherWith
+                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
+            },
             entryProvider = { key ->
                 when (key) {
                     Route.Home -> NavEntry(key) {
