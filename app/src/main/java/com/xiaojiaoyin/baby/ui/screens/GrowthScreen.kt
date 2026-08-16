@@ -204,7 +204,7 @@ private fun NodeTimelineItem(node: RecordEntity, onClick: () -> Unit) {
                 .padding(start = 12.dp, bottom = 8.dp)
                 .background(Card, RoundedCornerShape(18.dp))
                 .clickable(onClick = onClick)
-                .height(96.dp)
+                .height(84.dp)
                 .padding(14.dp)
         ) {
             Text(
@@ -221,16 +221,6 @@ private fun NodeTimelineItem(node: RecordEntity, onClick: () -> Unit) {
                 color = TextSecondary,
                 modifier = Modifier.padding(top = 4.dp)
             )
-            if (node.note.isNotBlank()) {
-                Text(
-                    text = node.note,
-                    fontSize = 12.sp,
-                    color = TextPrimary.copy(alpha = 0.75f),
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = 6.dp)
-                )
-            }
         }
     }
 }
