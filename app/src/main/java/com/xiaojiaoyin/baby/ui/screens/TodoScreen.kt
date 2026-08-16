@@ -141,10 +141,10 @@ fun TodoScreen(onBack: () -> Unit) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color(0xFFD96A6A), RoundedCornerShape(18.dp)),
+                                .background(Color(0xFFF2EFEF), RoundedCornerShape(18.dp)),
                             contentAlignment = Alignment.CenterEnd
                         ) {
-                            Text("删除", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 24.dp))
+                            Text("删除", color = TextSecondary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(end = 24.dp))
                         }
                     }
                 ) {
