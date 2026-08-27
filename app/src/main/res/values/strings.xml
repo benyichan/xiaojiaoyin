@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">小脚印</string>
-    <string name="widget_photo_desc">宝宝照片卡：头像 + 名字 + 月龄</string>
-    <string name="widget_info_desc">宝宝信息卡：月龄、生日倒计时、今日待办</string>
-</resources>

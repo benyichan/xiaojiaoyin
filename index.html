@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小脚印 · 把宝宝的每一步，都好好记下来</title>
+<meta name="description" content="完全离线的宝宝成长记录 Android App：喂养记录、WHO 生长曲线、疫苗医疗、专属相册、双机同步。本地优先，无账号无广告。">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+  :root{
+    --green:#2E9E76;--green-deep:#1F7A5B;--green-light:#E4F6EE;
+    --page:#F0FAF5;--ink:#2F463D;--ink-soft:#5F7A6C;--ink-faint:#9AB3A7;
+    --card:#FFFFFF;--gold:#E8A13C;--gold-bg:#FFF3E2;
+    --pink:#D96A9C;--pink-bg:#FDEBF2;--blue:#4A7FC0;--blue-bg:#E8F1FF;
+    --radius-s:12px;--radius-m:18px;--radius-l:24px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+    background:var(--page);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--green);color:#fff}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 32px}
+
+  /* ===== 导航 ===== */
+  .nav{position:sticky;top:0;z-index:50;background:rgba(240,250,245,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(46,158,118,.12)}
+  .nav-inner{max-width:1160px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
+  .brand-mark{width:30px;height:30px;border-radius:9px;background:var(--green);display:grid;place-items:center;flex:none}
+  .nav-links{display:flex;gap:28px;font-size:14px;color:var(--ink-soft);align-items:center}
+  .nav-links a:hover{color:var(--green-deep)}
+  .nav-cta{padding:8px 18px;border-radius:10px;background:var(--green);color:#fff;font-weight:600;font-size:14px;transition:background .2s,transform .2s}
+  .nav-cta:hover{background:var(--green-deep);transform:translateY(-1px)}
+
+  /* ===== Hero ===== */
+  .hero{position:relative;padding:88px 0 110px;overflow:hidden}
+  .hero::before{content:"";position:absolute;right:-180px;top:-220px;width:640px;height:640px;border-radius:50%;background:var(--green-light);z-index:0}
+  .hero::after{content:"";position:absolute;left:-240px;bottom:-300px;width:520px;height:520px;border-radius:50%;background:var(--green-light);opacity:.65;z-index:0}
+  .hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:minmax(400px,1fr) 1fr;gap:32px;align-items:center}
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--green-light);color:var(--green-deep);font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;margin-bottom:26px}
+  .hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .hero h1{font-size:64px;line-height:1.1;font-weight:900;letter-spacing:.02em;color:var(--ink);white-space:nowrap}
+  .hero h1 em{font-style:normal;color:var(--green)}
+  .hero-sub{margin-top:22px;font-size:21px;line-height:1.65;color:var(--ink-soft);font-weight:500;max-width:30em}
+  .hero-sub strong{color:var(--ink);font-weight:700}
+  .hero-btns{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:15px 28px;border-radius:14px;font-size:16px;font-weight:600;transition:transform .18s,box-shadow .18s,background .18s}
+  .btn-primary{background:var(--green);color:#fff;box-shadow:0 6px 18px rgba(46,158,118,.28)}
+  .btn-primary:hover{background:var(--green-deep);transform:translateY(-2px);box-shadow:0 10px 24px rgba(46,158,118,.32)}
+  .btn-ghost{background:#fff;color:var(--green-deep);border:1.5px solid rgba(46,158,118,.35)}
+  .btn-ghost:hover{border-color:var(--green);transform:translateY(-2px)}
+  .hero-notes{margin-top:26px;font-size:13.5px;color:var(--ink-faint);display:flex;gap:18px;flex-wrap:wrap}
+  .hero-notes span{display:inline-flex;align-items:center;gap:6px}
+
+  /* ===== 手机 mockup ===== */
+  .phones{position:relative;height:620px;transform-origin:center top}
+  .phone{position:absolute;width:266px;height:546px;background:#fff;border-radius:38px;border:1.5px solid rgba(47,70,61,.9);box-shadow:0 24px 60px rgba(31,122,91,.14);padding:16px 14px;overflow:hidden;top:50%;margin-top:-273px}
+  .phone-a{left:50%;margin-left:-133px;z-index:3}
+  .phone-b{left:calc(50% - 300px);top:calc(50% + 34px);z-index:1}
+  .phone-c{left:calc(50% + 34px);top:calc(50% + 34px);z-index:1}
+  .js .phone{animation:float 5.2s ease-in-out infinite}
+  .js .phone-b{animation-delay:-1.8s !important}
+  .js .phone-c{animation-delay:-3.4s !important}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+
+  /* 宝宝档案页（中） */
+  .baby-card{background:var(--green);border-radius:16px;padding:12px 12px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .baby-av{width:34px;height:34px;border-radius:50%;background:#fff;color:var(--green-deep);display:grid;place-items:center;font-size:15px;font-weight:800;flex:none}
+  .baby-info b{font-size:15px;font-weight:800;display:block}
+  .baby-info span{font-size:10px;opacity:.9}
+  .baby-tag{background:rgba(255,255,255,.22);font-size:8px;padding:1px 6px;border-radius:99px;margin-left:4px}
+  .baby-switch{margin-left:auto;font-size:9px;opacity:.9}
+  .baby-meta{display:flex;font-size:8.5px;color:#fff;opacity:.95;margin-bottom:8px;gap:0}
+  .baby-meta div{flex:1;text-align:center;border-left:1px solid rgba(255,255,255,.2);padding:0 2px}
+  .baby-meta div:first-child{border-left:none}
+  .baby-meta small{display:block;opacity:.7;font-size:7.5px;margin-bottom:2px}
+  .baby-meta b{font-size:9px;font-weight:700}
+  .bazi{background:var(--green-light);color:var(--green-deep);font-size:8.5px;font-weight:600;border-radius:8px;padding:5px 8px;text-align:center;margin-bottom:10px}
+  .bday-row{display:flex;gap:8px;margin-bottom:10px}
+  .bday{flex:1;background:#fff;border:1.5px solid #EDF3EF;border-radius:12px;padding:8px;text-align:center}
+  .bday small{display:block;font-size:7.5px;color:var(--ink-faint);margin-bottom:3px}
+  .bday b{font-size:13px;font-weight:800}
+  .bday.gold b{color:var(--gold)}
+  .bday.pink b{color:var(--pink)}
+  .bday i{font-style:normal;font-size:7.5px;color:var(--ink-faint);display:block;margin-top:2px}
+  .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+  .quick button{border:none;background:var(--page);border-radius:10px;padding:7px 0;font-size:8.5px;font-weight:600;color:var(--ink-soft)}
+  .quick button i{display:block;width:4px;height:4px;border-radius:50%;margin:0 auto 3px}
+  .feed-title{font-size:9px;font-weight:700;color:var(--ink-soft);margin:6px 0 6px}
+  .feed{background:#fff;border:1.5px solid #EDF3EF;border-radius:12px;padding:7px 9px;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+  .feed .ic{width:20px;height:20px;border-radius:6px;flex:none;font-size:8px;display:grid;place-items:center;font-weight:700}
+  .feed b{font-size:9.5px;font-weight:700;display:block}
+  .feed span{font-size:7.5px;color:var(--ink-faint)}
+  .ic.feed-g{background:var(--green-light);color:var(--green-deep)}
+  .ic.feed-p{background:var(--pink-bg);color:var(--pink)}
+  .ic.feed-b{background:var(--blue-bg);color:var(--blue)}
+
+  /* 时间轴页（左） */
+  .axis-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .axis-head b{font-size:15px;font-weight:800}
+  .axis-head span{font-size:8px;color:var(--green-deep);background:var(--green-light);padding:3px 7px;border-radius:8px;font-weight:600}
+  .axis-search{height:26px;border-radius:8px;background:var(--page);color:var(--ink-faint);font-size:8.5px;display:flex;align-items:center;padding:0 9px;margin-bottom:10px}
+  .axis-month{font-size:8px;color:var(--ink-faint);font-weight:600;margin:8px 0 5px}
+  .axis-item{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+  .axis-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);margin-top:7px;flex:none}
+  .axis-item .card{background:#fff;border:1.5px solid #EDF3EF;border-radius:10px;padding:7px 9px;flex:1}
+  .axis-item .card b{font-size:9px;font-weight:700;display:block}
+  .axis-item .card span{font-size:7.5px;color:var(--ink-faint)}
+
+  /* 相册页（右） */
+  .alb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .alb-head b{font-size:15px;font-weight:800}
+  .alb-head span{font-size:8px;color:var(--green-deep);background:var(--green-light);padding:3px 7px;border-radius:8px;font-weight:600}
+  .alb-search{height:26px;border-radius:8px;background:var(--page);color:var(--ink-faint);font-size:8.5px;display:flex;align-items:center;padding:0 9px;margin-bottom:8px}
+  .alb-chips{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
+  .alb-chip{font-size:7.5px;padding:3px 8px;border-radius:999px;background:var(--green-light);color:var(--ink-soft)}
+  .alb-chip.on{background:var(--green);color:#fff;font-weight:600}
+  .alb-month{font-size:8px;color:var(--ink-faint);font-weight:600;margin:4px 0 5px}
+  .alb-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .alb-ph{height:44px;border-radius:8px;position:relative;overflow:hidden}
+  .alb-ph span{position:absolute;left:5px;bottom:4px;font-size:7px;color:#fff;background:rgba(0,0,0,.3);padding:1px 5px;border-radius:6px}
+
+  /* 手机底栏 */
+  .p-tabbar{margin-top:auto;display:flex;justify-content:space-around;border-top:1px solid #EDF3EF;padding-top:8px;font-size:8px;color:var(--ink-faint)}
+  .p-tabbar b{color:var(--green);font-weight:700}
+
+  /* ===== 信任横条 ===== */
+  .strip{background:var(--green-light);border-top:1px solid rgba(46,158,118,.15);border-bottom:1px solid rgba(46,158,118,.15)}
+  .strip-inner{max-width:1160px;margin:0 auto;padding:18px 32px;display:flex;justify-content:center;gap:40px;flex-wrap:wrap;font-size:14px;font-weight:600;color:var(--green-deep)}
+
+  /* ===== 通用 section ===== */
+  section{padding:110px 0}
+  .sec-kicker{font-size:14px;font-weight:700;color:var(--green);letter-spacing:.18em;margin-bottom:16px}
+  .sec-title{font-size:44px;font-weight:900;line-height:1.2;letter-spacing:.01em}
+  .sec-lead{margin-top:18px;font-size:17px;line-height:1.75;color:var(--ink-soft);max-width:44em}
+
+  /* ===== 痛点 ===== */
+  .pains .q{font-size:46px;font-weight:900;line-height:1.3;padding:30px 0;border-bottom:2px solid rgba(46,158,118,.14);display:flex;align-items:baseline;gap:26px;flex-wrap:wrap}
+  .pains .q:first-of-type{border-top:2px solid rgba(46,158,118,.14)}
+  .pains .q small{font-size:17px;font-weight:500;color:var(--ink-faint);letter-spacing:0}
+  .pains .a{margin-top:34px;font-size:19px;color:var(--ink-soft);line-height:1.8;max-width:40em}
+  .pains .a strong{color:var(--green-deep)}
+
+  /* ===== 四个核心 ===== */
+  .trio{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:56px}
+  .trio-card{background:var(--card);border-radius:var(--radius-m);padding:28px;border:1px solid rgba(46,158,118,.12);box-shadow:0 4px 20px rgba(31,122,91,.06);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column}
+  .trio-card:hover{transform:translateY(-5px);box-shadow:0 14px 34px rgba(31,122,91,.12)}
+  .trio-card h3{font-size:24px;font-weight:800;margin-bottom:12px}
+  .trio-card p{font-size:15px;line-height:1.8;color:var(--ink-soft)}
+  .trio-card p b{color:var(--ink)}
+  .mini{height:150px;border-radius:var(--radius-s);background:var(--page);border:1.5px solid #EDF3EF;margin-bottom:20px;padding:14px;display:flex;flex-direction:column;justify-content:center;gap:8px;overflow:hidden}
+  .mini-chip{align-self:flex-start;font-size:11.5px;font-weight:600;background:#fff;border:1.5px solid #E3EFE8;border-radius:8px;padding:5px 10px;color:var(--ink-soft)}
+  .mini-chip b{color:var(--green-deep)}
+  .mini-chip.gold{color:var(--gold)}
+  .mini-chip.pink{color:var(--pink)}
+  .mini-line{display:flex;gap:8px;align-items:center;background:#fff;border:1.5px solid #E3EFE8;border-radius:9px;padding:8px 10px;font-size:11px;color:var(--ink-soft)}
+  .mini-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none}
+  .mini-barwrap{background:#fff;border:1.5px solid #E3EFE8;border-radius:10px;padding:10px 11px}
+  .mini-barlabel{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-soft);margin-bottom:7px}
+  .mini-bar{height:7px;border-radius:99px;background:var(--green-light);position:relative;overflow:hidden}
+  .mini-bar i{position:absolute;left:8%;top:0;bottom:0;width:38%;background:var(--green);border-radius:99px}
+  .mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .mini-grid div{height:26px;border-radius:6px}
+
+  /* ===== 更多功能网格 ===== */
+  .grid8{margin-top:52px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .g-card{background:var(--card);border-radius:var(--radius-m);padding:24px 22px;border:1px solid rgba(46,158,118,.12);transition:transform .2s,border-color .2s}
+  .g-card:hover{transform:translateY(-4px);border-color:rgba(46,158,118,.4)}
+  .g-icon{width:44px;height:44px;border-radius:12px;background:var(--green-light);display:grid;place-items:center;margin-bottom:16px}
+  .g-icon.gold{background:var(--gold-bg)}
+  .g-icon.pink{background:var(--pink-bg)}
+  .g-icon.blue{background:var(--blue-bg)}
+  .g-card h4{font-size:16.5px;font-weight:800;margin-bottom:7px}
+  .g-card p{font-size:13px;line-height:1.7;color:var(--ink-soft)}
+
+  /* ===== 隐私（深色） ===== */
+  .local-card{background:var(--green-deep);border-radius:var(--radius-l);padding:76px 72px;color:#fff;position:relative;overflow:hidden}
+  .local-card::before{content:"";position:absolute;right:-140px;top:-140px;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,.07)}
+  .local-card::after{content:"";position:absolute;left:38%;bottom:-190px;width:380px;height:380px;border-radius:50%;background:rgba(255,255,255,.05)}
+  .local-inner{position:relative;z-index:1}
+  .local-card h2{font-size:42px;font-weight:900;line-height:1.25;max-width:14em}
+  .local-card .sub{margin-top:16px;font-size:16.5px;line-height:1.8;color:rgba(255,255,255,.78);max-width:36em}
+  .local-points{margin-top:46px;display:grid;grid-template-columns:repeat(4,auto);gap:0 56px;justify-content:start}
+  .lp b{display:block;font-size:24px;font-weight:800;margin-bottom:8px}
+  .lp span{font-size:13.5px;color:rgba(255,255,255,.66);line-height:1.6;display:block;max-width:12em}
+
+  /* ===== Pro ===== */
+  .pro-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:52px}
+  .pro-card{background:#fff;border-radius:var(--radius-m);padding:30px;border:1.5px solid rgba(46,158,118,.15)}
+  .pro-card.pro{border-color:var(--green);box-shadow:0 8px 28px rgba(46,158,118,.14)}
+  .pro-card h4{font-size:22px;font-weight:800;margin-bottom:6px}
+  .pro-card .pr{font-size:30px;font-weight:900;color:var(--green-deep);margin:6px 0 14px}
+  .pro-card .pr s{color:var(--ink-faint);font-size:16px;font-weight:500;margin-left:6px}
+  .pro-card ul{list-style:none}
+  .pro-card li{font-size:14.5px;color:var(--ink-soft);padding:7px 0 7px 24px;position:relative}
+  .pro-card li::before{content:"";position:absolute;left:0;top:11px;width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .pro-card li.lock{color:var(--ink-faint)}
+  .pro-card li.lock::before{background:var(--ink-faint)}
+  .trial{margin-top:20px;background:var(--gold-bg);border-radius:12px;padding:14px 18px;font-size:13.5px;color:#9A6A1B;line-height:1.6}
+
+  /* ===== CTA ===== */
+  .cta{text-align:center;padding:120px 0 90px}
+  .cta h2{font-size:52px;font-weight:900;line-height:1.2}
+  .cta p{margin-top:18px;font-size:17px;color:var(--ink-soft)}
+  .cta .hero-btns{justify-content:center}
+  .cta .motto{margin-top:56px;font-size:15px;color:var(--ink-faint);letter-spacing:.28em}
+  footer{border-top:1px solid rgba(46,158,118,.14);padding:26px 0;text-align:center;font-size:13px;color:var(--ink-faint)}
+  footer b{color:var(--green-deep);font-weight:700}
+
+  /* ===== reveal ===== */
+  .js [data-reveal]{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.22,.8,.3,1),transform .7s cubic-bezier(.22,.8,.3,1)}
+  .js [data-reveal].in{opacity:1;transform:none}
+  .js [data-reveal="1"]{transition-delay:.06s}
+  .js [data-reveal="2"]{transition-delay:.14s}
+  .js [data-reveal="3"]{transition-delay:.22s}
+  .js [data-reveal="4"]{transition-delay:.30s}
+
+  /* ===== 响应式 ===== */
+  @media (max-width:1080px){
+    .hero-grid{grid-template-columns:1fr}
+    .phones{height:auto;display:flex;gap:18px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+    .phone{position:relative;inset:auto;margin:0;transform:scale(.9)}
+    .js .phone{animation:none}
+    .hero h1{font-size:56px}
+    .grid8{grid-template-columns:repeat(2,1fr)}
+    .trio{grid-template-columns:1fr}
+    .pro-grid{grid-template-columns:1fr}
+    .local-points{grid-template-columns:repeat(2,1fr);gap:28px 40px}
+    .local-card{padding:56px 36px}
+    .pains .q{font-size:34px}
+  }
+  @media (max-width:640px){
+    .wrap{padding:0 20px}
+    .hero{padding:56px 0 70px}
+    .hero h1{font-size:46px}
+    .sec-title{font-size:32px}
+    .cta h2{font-size:36px}
+    .grid8{grid-template-columns:1fr}
+    .pains .q{font-size:27px}
+    .phone{transform:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v5a6 6 0 0 0 12 0V3"/><path d="M6 8c-2 0-3 1.5-3 3v1a6 6 0 0 0 6 6"/><path d="M18 8c2 0 3 1.5 3 3v1a6 6 0 0 1-6 6"/><path d="M9 21h6"/><path d="M12 18v3"/></svg>
+      </span>
+      小脚印
+    </a>
+    <div class="nav-links">
+      <a href="#pains">为什么做它</a>
+      <a href="#core">核心功能</a>
+      <a href="#pro">会员</a>
+      <a class="nav-cta" href="https://github.com/benyichan/xiaojiaoyin" target="_blank" rel="noopener">GitHub 仓库</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="hero-eyebrow"><span class="dot"></span>宝宝成长记录 · 本地优先 · 完全离线</span>
+      <h1>小脚印<br>把宝宝的每一步<br><em>都好好记下来</em></h1>
+      <p class="hero-sub">喂养、哭闹、生长、疫苗、照片——宝宝的每个瞬间，<strong>一个 App 全部记下</strong>。本地优先，完全离线，数据只在你自己手机里。</p>
+      <div class="hero-btns">
+        <a class="btn btn-primary" href="https://github.com/benyichan/xiaojiaoyin" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.6.5.5 5.7.5 12.1c0 5.1 3.3 9.5 7.9 11 .6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.6-3.9-1.6-.5-1.4-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.2c0 .4.2.7.8.6 4.6-1.5 7.9-5.9 7.9-11C23.5 5.7 18.4.5 12 .5z"/></svg>
+          GitHub 仓库
+        </a>
+        <a class="btn btn-ghost" href="#core">看看它怎么记录</a>
+      </div>
+      <div class="hero-notes">
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2E9E76" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>MIT 协议，代码全公开</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2E9E76" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>无账号，装上就能用</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2E9E76" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>新用户免费试用 7 天</span>
+      </div>
+    </div>
+
+    <!-- 三手机 -->
+    <div class="phones" aria-hidden="true">
+      <!-- 左：成长时间轴 -->
+      <div class="phone phone-b">
+        <div class="axis-head"><b>成长时间轴</b><span>+ 记录节点</span></div>
+        <div class="axis-search">搜索节点…</div>
+        <div class="axis-month">2026年8月</div>
+        <div class="axis-item"><div class="axis-dot"></div><div class="card"><b>第一次坐稳</b><span>8月12日 14:40</span></div></div>
+        <div class="axis-item"><div class="axis-dot"></div><div class="card"><b>长出第一颗牙</b><span>8月2日 09:20</span></div></div>
+        <div class="axis-month">2026年7月</div>
+        <div class="axis-item"><div class="axis-dot"></div><div class="card"><b>第一次叫出声</b><span>7月18日 16:03</span></div></div>
+        <div class="axis-item"><div class="axis-dot"></div><div class="card"><b>第一次翻身</b><span>7月2日 14:36</span></div></div>
+        <div class="p-tabbar"><span>首页</span><b>成长</b><span>相册</span><span>统计</span><span>我的</span></div>
+      </div>
+      <!-- 中：宝宝档案首页 -->
+      <div class="phone phone-a">
+        <div class="baby-card">
+          <div class="baby-av">乐</div>
+          <div class="baby-info"><b>乐乐<span class="baby-tag">女宝</span></b><span>小名 乐宝 · 3个月</span></div>
+          <div class="baby-switch">切换 ›</div>
+        </div>
+        <div class="baby-meta">
+          <div><small>出生</small><b>2026-05-12</b></div>
+          <div><small>生肖</small><b>马</b></div>
+          <div><small>星座</small><b>金牛座</b></div>
+          <div><small>农历</small><b>三月廿六</b></div>
+        </div>
+        <div class="bazi">八字 · 丙午年 · 癸巳月 · 丙戌日 · 癸巳时</div>
+        <div class="bday-row">
+          <div class="bday gold"><small>阳历生日</small><b>269 天</b><i>2027-05-12</i></div>
+          <div class="bday pink"><small>农历生日</small><b>259 天</b><i>三月廿六</i></div>
+        </div>
+        <div class="quick">
+          <button><i style="background:#2E9E76"></i>喂养</button>
+          <button><i style="background:#D96A9C"></i>哭闹</button>
+          <button><i style="background:#4A7FC0"></i>生长</button>
+          <button><i style="background:#E8A13C"></i>拍照</button>
+        </div>
+        <div class="feed-title">最近动态</div>
+        <div class="feed"><div class="ic feed-g">喂</div><div><b>母乳 · 110ml</b><span>8月16日 23:30</span></div></div>
+        <div class="feed"><div class="ic feed-p">哭</div><div><b>困了</b><span>8月16日 21:10</span></div></div>
+        <div class="feed"><div class="ic feed-g">喂</div><div><b>奶粉 · 140ml</b><span>8月16日 19:00</span></div></div>
+        <div class="p-tabbar"><b>首页</b><span>成长</span><span>相册</span><span>统计</span><span>我的</span></div>
+      </div>
+      <!-- 右：相册 -->
+      <div class="phone phone-c">
+        <div class="alb-head"><b>相册</b><span>+ 添加</span></div>
+        <div class="alb-search">搜索备注或标签…</div>
+        <div class="alb-chips"><span class="alb-chip on">全部</span><span class="alb-chip">2026年8月</span><span class="alb-chip">2026年7月</span></div>
+        <div class="alb-chips"><span class="alb-chip on">全部</span><span class="alb-chip">关键时刻</span><span class="alb-chip">日常</span><span class="alb-chip">满月</span></div>
+        <div class="alb-month">2026年8月</div>
+        <div class="alb-grid">
+          <div class="alb-ph" style="background:linear-gradient(135deg,#BFE3D2,#8FCBB4)"><span>亲子时光</span></div>
+        </div>
+        <div class="alb-month">2026年7月</div>
+        <div class="alb-grid">
+          <div class="alb-ph" style="background:linear-gradient(135deg,#F4D7E2,#E8B4C8)"><span>育儿书</span></div>
+          <div class="alb-ph" style="background:linear-gradient(135deg,#CFE0F2,#9FBFDF)"><span>第一次翻身</span></div>
+        </div>
+        <div class="alb-month">2026年6月</div>
+        <div class="alb-grid">
+          <div class="alb-ph" style="background:linear-gradient(135deg,#F7E3C8,#EFCB9E)"><span>满月照</span></div>
+        </div>
+        <div class="p-tabbar"><span>首页</span><span>成长</span><b>相册</b><span>统计</span><span>我的</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 信任横条 -->
+<div class="strip">
+  <div class="strip-inner">
+    <span>完全离线</span>
+    <span>本地备份</span>
+    <span>同一 Wi-Fi 双机共享</span>
+    <span>无广告</span>
+    <span>无账号</span>
+  </div>
+</div>
+
+<!-- 痛点 -->
+<section class="pains" id="pains">
+  <div class="wrap">
+    <div class="sec-kicker" data-reveal>WHY</div>
+    <h2 class="sec-title" data-reveal>带娃的每一天，<br>都在考验你的记性</h2>
+    <div style="margin-top:52px">
+      <div class="q" data-reveal>「昨晚到底喂了几次？」<small>凌晨三点，困得记不清，只能靠猜</small></div>
+      <div class="q" data-reveal>「宝宝长得够不够快？」<small>身高体重凭感觉，到底达不达标没底</small></div>
+      <div class="q" data-reveal>「疫苗哪天打？」<small>一推再推，生怕错过该打的针</small></div>
+      <div class="q" data-reveal>「第一次翻身的照片呢？」<small>翻遍相册和聊天记录，就是找不到</small></div>
+    </div>
+    <p class="a" data-reveal>记性靠不住，就让 App 来记。小脚印把这些事<strong>一件件替你盯住</strong>：喂了什么、长了多少、哪天打疫苗、照片存哪，全都有迹可循。</p>
+  </div>
+</section>
+
+<!-- 四个核心 -->
+<section id="core" style="padding-top:20px">
+  <div class="wrap">
+    <div class="sec-kicker" data-reveal>CORE</div>
+    <h2 class="sec-title" data-reveal>宝宝的事，<br>它替你一件件记着</h2>
+
+    <div class="trio">
+      <div class="trio-card" data-reveal="1">
+        <div class="mini">
+          <span class="mini-chip">出生 2026-05-12 · 生肖马 · 金牛座</span>
+          <span class="mini-chip"><b>八字 丙午年 · 癸巳月 · 丙戌日 · 癸巳时</b></span>
+          <span class="mini-chip gold">阳历生日 269 天 · 农历 259 天</span>
+        </div>
+        <h3>智能档案</h3>
+        <p>自动算出<b>农历、生肖、星座、八字</b>，两个生日倒计时。宝宝的「档案」一次录全，点开就有。</p>
+      </div>
+      <div class="trio-card" data-reveal="2">
+        <div class="mini">
+          <div class="mini-line"><span class="mini-dot"></span>母乳 · 110ml · 8月16日 23:30</div>
+          <div class="mini-line"><span class="mini-dot"></span>困了 · 8月16日 21:10</div>
+          <div class="mini-line"><span class="mini-dot"></span>奶粉 · 140ml · 8月16日 19:00</div>
+        </div>
+        <h3>随手记录</h3>
+        <p><b>喂养、哭闹、生长、待办</b>，一屏快速记下。到点提醒你，复盘今天喂了几次、睡了多久。</p>
+      </div>
+      <div class="trio-card" data-reveal="3">
+        <div class="mini">
+          <div class="mini-barwrap"><div class="mini-barlabel"><span>身高曲线</span><span>P3 · P50 · P97</span></div><div class="mini-bar"><i></i></div></div>
+          <span class="mini-chip">WHO 参考线 + 宝宝数据点</span>
+        </div>
+        <h3>成长全景</h3>
+        <p><b>WHO 儿童生长曲线</b>离线参考线，宝宝身高体重实时对照。时间轴、统计看板，一眼看全成长。</p>
+      </div>
+      <div class="trio-card" data-reveal="4">
+        <div class="mini">
+          <div class="mini-grid">
+            <div style="background:#BFE3D2"></div><div style="background:#F4D7E2"></div><div style="background:#CFE0F2"></div>
+            <div style="background:#F7E3C8"></div><div style="background:#E4F6EE"></div><div style="background:#F3D5D5"></div>
+          </div>
+          <span class="mini-chip">关键时刻 · 第一次翻身 · 满月照</span>
+        </div>
+        <h3>专属相册</h3>
+        <p>照片按月分组、<b>加标签、可搜索</b>。成长节点的照片自动归档，关键时刻一键找到。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 更多功能 -->
+<section id="more" style="padding-top:20px">
+  <div class="wrap">
+    <div class="feat-head" style="display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap">
+      <div>
+        <div class="sec-kicker" data-reveal>MORE</div>
+        <h2 class="sec-title" data-reveal>围绕宝宝成长，<br>该想的都想到了</h2>
+      </div>
+      <p class="sec-lead" data-reveal style="max-width:22em;margin-top:0">从记录到回看，从一台手机到两台，每一步都替你想到了。</p>
+    </div>
+
+    <div class="grid8">
+      <div class="g-card" data-reveal="1">
+        <div class="g-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#2E9E76" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <h4>待办提醒</h4>
+        <p>待办到点提醒你，精确闹钟、重启自动恢复。</p>
+      </div>
+      <div class="g-card" data-reveal="2">
+        <div class="g-icon gold"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#E8A13C" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
+        <h4>疫苗医疗</h4>
+        <p>疫苗日程自动提醒，疫苗、体检、就诊、用药分类记录。</p>
+      </div>
+      <div class="g-card" data-reveal="3">
+        <div class="g-icon pink"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#D96A9C" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
+        <h4>双机同步</h4>
+        <p>同一 Wi-Fi 下两台手机互相共享，爸爸妈妈的 App 同步。</p>
+      </div>
+      <div class="g-card" data-reveal="4">
+        <div class="g-icon blue"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#4A7FC0" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+        <h4>统计看板</h4>
+        <p>喂养 14 天趋势、哭闹分布、待办完成率，可视化复盘。</p>
+      </div>
+      <div class="g-card" data-reveal="1">
+        <div class="g-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#2E9E76" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></div>
+        <h4>那年今日</h4>
+        <p>每年同一天的记录自动聚合，回看宝宝每岁的今天。</p>
+      </div>
+      <div class="g-card" data-reveal="2">
+        <div class="g-icon gold"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#E8A13C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/></svg></div>
+        <h4>多宝宝</h4>
+        <p>多宝宝档案可切换，二宝三宝一个 App 都装下。</p>
+      </div>
+      <div class="g-card" data-reveal="3">
+        <div class="g-icon pink"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#D96A9C" stroke-width="2" stroke-linecap="round"><path d="M4 14h6v6M20 10h-6V4"/><path d="M20 4 4 20"/></svg></div>
+        <h4>备份恢复</h4>
+        <p>每周自动备份，支持手动导出 / 恢复，换机不丢。</p>
+      </div>
+      <div class="g-card" data-reveal="4">
+        <div class="g-icon blue"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#4A7FC0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+        <h4>桌面小组件</h4>
+        <p>照片、宝宝信息小组件，桌面直接看宝宝的今天。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 隐私（深色） -->
+<section style="padding-top:20px">
+  <div class="wrap">
+    <div class="local-card" data-reveal>
+      <div class="local-inner">
+        <h2>宝宝的数据，<br>只存在你自己手机里</h2>
+        <p class="sub">没有注册登录，没有云端同步，没有广告。宝宝的照片、喂养、生长、疫苗记录全部存在本机，永远属于你。</p>
+        <div class="local-points">
+          <div class="lp"><b>无账号</b><span>装上就能用，不用注册任何东西</span></div>
+          <div class="lp"><b>完全离线</b><span>全部功能离线可用，不依赖网络</span></div>
+          <div class="lp"><b>无广告</b><span>没有开屏、没有信息流、没有推送骚扰</span></div>
+          <div class="lp"><b>可备份</b><span>每周自动备份，换机恢复一分钟搞定</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pro -->
+<section id="pro" style="padding-top:20px">
+  <div class="wrap">
+    <div class="sec-kicker" data-reveal>PLAN</div>
+    <h2 class="sec-title" data-reveal>免费能用，Pro 更全</h2>
+    <p class="sec-lead" data-reveal>新用户免费试用 7 天，试用期内全部 Pro 功能可用。到期后仅提醒一次，不打扰。</p>
+
+    <div class="pro-grid">
+      <div class="pro-card" data-reveal="1">
+        <h4>免费版</h4>
+        <div class="pr">¥0</div>
+        <ul>
+          <li>1 个宝宝档案</li>
+          <li>相册 30 张照片</li>
+          <li>喂养 / 哭闹 / 生长 / 待办 随手记录</li>
+          <li class="lock">统计看板 / WHO 生长曲线</li>
+          <li class="lock">多设备同步 / 医疗 / 学籍 / 好物 / 那年今日</li>
+        </ul>
+      </div>
+      <div class="pro-card pro" data-reveal="2">
+        <h4>Pro / 试用</h4>
+        <div class="pr">¥6.8 <span style="font-size:16px;font-weight:600;color:var(--ink-soft)">/ 月</span>　¥159 <span style="font-size:16px;font-weight:600;color:var(--ink-soft)">永久买断</span></div>
+        <ul>
+          <li>多宝宝档案</li>
+          <li>相册无限照片</li>
+          <li>统计看板 / WHO 生长曲线</li>
+          <li>多设备同步</li>
+          <li>医疗 / 学籍 / 好物 / 那年今日</li>
+        </ul>
+        <div class="trial">新用户免费试用 7 天，全部 Pro 功能解锁；到期后只提醒一次。年度 ¥59（限时 77 折）。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="wrap">
+    <h2 data-reveal>记录宝宝，从今天开始</h2>
+    <p data-reveal>完全离线 · 本地优先 · 免费试用 7 天。代码全公开，欢迎 star、提 issue。</p>
+    <div class="hero-btns" data-reveal>
+      <a class="btn btn-primary" href="https://github.com/benyichan/xiaojiaoyin" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.6.5.5 5.7.5 12.1c0 5.1 3.3 9.5 7.9 11 .6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.6-3.9-1.6-.5-1.4-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.2c0 .4.2.7.8.6 4.6-1.5 7.9-5.9 7.9-11C23.5 5.7 18.4.5 12 .5z"/></svg>
+        去 GitHub 看看
+      </a>
+    </div>
+    <p class="motto" data-reveal>小 脚 印 · 让 爱 有 迹 可 循</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <b>小脚印</b> · 把宝宝的每一步，都好好记下来 ｜ Made with love by <b>@benyichan</b>
+  </div>
+</footer>
+
+<script>
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  },{threshold:.12});
+  document.querySelectorAll('[data-reveal]').forEach(function(el){ io.observe(el); });
+</script>
+</body>
+</html>
