@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 private val FIELD_TEMPLATES = listOf("身份证号", "血型", "过敏史", "民族", "疫苗接种机构", "出生医院", "身高出生值", "体重出生值")
 
@@ -213,7 +214,7 @@ fun BabyDetailScreen(babyId: Long, onBack: () -> Unit) {
                             "删",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFD96A6A),
+                            color = Red,
                             modifier = Modifier
                                 .padding(start = 8.dp)
                                 .clickable {
@@ -263,9 +264,10 @@ private fun CustomFieldDialog(
                     onValueChange = { key = it },
                     placeholder = { Text("字段名，如 血型", fontSize = 12.sp) },
                     singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFF5FBF8),
-                        unfocusedContainerColor = Color(0xFFF5FBF8),
+                        focusedContainerColor = Card,
+                        unfocusedContainerColor = Card,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
@@ -275,9 +277,10 @@ private fun CustomFieldDialog(
                     value = value,
                     onValueChange = { value = it },
                     placeholder = { Text("内容，如 A 型", fontSize = 12.sp) },
+                    shape = RoundedCornerShape(14.dp),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFF5FBF8),
-                        unfocusedContainerColor = Color(0xFFF5FBF8),
+                        focusedContainerColor = Card,
+                        unfocusedContainerColor = Card,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     ),

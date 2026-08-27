@@ -45,6 +45,15 @@ interface RecordDao {
     @Query("SELECT COUNT(*) FROM record")
     suspend fun countAll(): Int
 
+    @Query("SELECT * FROM record WHERE babyId = :babyId")
+    suspend fun getAllByBaby(babyId: Long): List<RecordEntity>
+
+    @Query("SELECT * FROM record WHERE uuid = :uuid")
+    suspend fun getByUuid(uuid: String): RecordEntity?
+
+    @Query("DELETE FROM record WHERE babyId = :babyId")
+    suspend fun deleteByBabyId(babyId: Long)
+
     @Delete
     suspend fun delete(record: RecordEntity)
 

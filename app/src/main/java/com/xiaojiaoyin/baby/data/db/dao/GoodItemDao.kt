@@ -14,6 +14,9 @@ interface GoodItemDao {
     @Query("SELECT * FROM good_item WHERE babyId = :babyId ORDER BY createdAt DESC")
     fun observeAll(babyId: Long): Flow<List<GoodItemEntity>>
 
+    @Query("SELECT * FROM good_item WHERE uuid = :uuid")
+    suspend fun getByUuid(uuid: String): GoodItemEntity?
+
     @Query("SELECT * FROM good_item")
     suspend fun getAllAll(): List<GoodItemEntity>
 
@@ -22,6 +25,9 @@ interface GoodItemDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<GoodItemEntity>)
+
+    @Query("DELETE FROM good_item WHERE babyId = :babyId")
+    suspend fun deleteByBabyId(babyId: Long)
 
     @Update
     suspend fun update(item: GoodItemEntity)

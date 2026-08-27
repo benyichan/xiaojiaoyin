@@ -30,6 +30,7 @@ import com.xiaojiaoyin.baby.ui.components.SegmentedField
 import com.xiaojiaoyin.baby.ui.components.TextInputField
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import kotlinx.coroutines.launch
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @Composable
 fun SchoolFormScreen(onBack: () -> Unit) {
@@ -69,13 +70,13 @@ fun SchoolFormScreen(onBack: () -> Unit) {
         TextInputField("学费 / 年（元）", costYuan, onValueChange = { costYuan = it }, placeholder = "如 8000（选填）")
         TextInputField("备注", note, onValueChange = { note = it }, placeholder = "校车、接送人等")
         error?.let {
-            Text(it, fontSize = 12.sp, color = Color(0xFFD96A6A), modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+            Text(it, fontSize = 12.sp, color = Red, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 16.dp)
-                .background(Mint, RoundedCornerShape(16.dp))
+                .background(Mint, RoundedCornerShape(14.dp))
                 .clickable {
                     if (schoolName.isBlank()) {
                         error = "请填写学校名称"

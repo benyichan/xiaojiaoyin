@@ -2,12 +2,15 @@ package com.xiaojiaoyin.baby.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.data.db.entity.BabyEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordType
 import com.xiaojiaoyin.baby.data.repository.BabyRepository
 import com.xiaojiaoyin.baby.data.repository.RecordRepository
 import com.xiaojiaoyin.baby.data.settings.SettingsRepository
+import com.xiaojiaoyin.baby.domain.AnniversaryCalc
+import com.xiaojiaoyin.baby.domain.BabyAge
 import com.xiaojiaoyin.baby.domain.FeedRules
 import com.xiaojiaoyin.baby.domain.LunarCalculator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,6 +28,8 @@ data class HomeUiState(
     val derived: com.xiaojiaoyin.baby.domain.DerivedInfo? = null,
     val ageText: String = "",
     val feedRecords: List<RecordEntity> = emptyList(),
+    /** 最近的纪念日（名称 to 倒计时文案）；null = 无 */
+    val nextAnniversary: Pair<String, String>? = null,
     val loading: Boolean = true
 )
 
@@ -44,8 +49,9 @@ class HomeViewModel(
                 } else {
                     combine(
                         recordRepo.observeRecent(baby.id, limit = 30),
-                        settings.typeVisibility
-                    ) { records, visibility ->
+                        settings.typeVisibility,
+                        AppGraph.anniversaryRepository.observeByBaby(baby.id)
+                    ) { records, visibility, anniversaries ->
                         val now = System.currentTimeMillis()
                         val ageMonths = FeedRules.ageMonths(baby.birthDateTime, now)
                         val filtered = records.filter { r ->
@@ -55,12 +61,19 @@ class HomeViewModel(
                                 else -> !isAutoHidden(baby.id, r.type, ageMonths, now)
                             }
                         }
+                        val next = anniversaries
+                            .map { it to AnniversaryCalc.daysUntil(it.dateAt, it.repeatYearly, now) }
+                            .filter { it.second >= 0 }
+                            .minByOrNull { it.second }
                         HomeUiState(
                             babies = babies,
                             currentBaby = baby,
                             derived = LunarCalculator.computeDerivedInfo(baby.birthDateTime, now),
                             ageText = ageText(baby.birthDateTime, now),
                             feedRecords = filtered,
+                            nextAnniversary = next?.let { (a, d) ->
+                                a.name to AnniversaryCalc.countdownText(a.dateAt, a.repeatYearly, now)
+                            },
                             loading = false
                         )
                     }
@@ -79,19 +92,5 @@ class HomeViewModel(
         return FeedRules.shouldAutoHide(type, ageMonths, last, now)
     }
 
-    private fun ageText(birthMillis: Long, now: Long): String {
-        val months = FeedRules.ageMonths(birthMillis, now)
-        return when {
-            months < 1 -> "出生不到 1 个月"
-            months < 24 -> {
-                val years = months / 12
-                val rest = months % 12
-                if (years == 0) "${months}个月" else "${years}岁${rest}个月"
-            }
-            else -> {
-                val years = months / 12
-                "${years}岁"
-            }
-        }
-    }
+    private fun ageText(birthMillis: Long, now: Long): String = BabyAge.text(birthMillis, now)
 }

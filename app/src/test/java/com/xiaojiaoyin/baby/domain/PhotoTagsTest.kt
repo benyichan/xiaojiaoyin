@@ -52,15 +52,17 @@ class PhotoTagsTest {
     @Test
     fun `同步序列化保留标签与父节点`() {
         val r = photo(7, tags = "关键时刻,满月", parentId = 9)
-        val restored = SyncJson.recordFromJson(JSONObject(SyncJson.recordToJson(r)))
+        val restored = SyncJson.recordFromJson(JSONObject(SyncJson.recordToJson(r, "baby-u", "parent-u")))
         assertEquals("关键时刻,满月", restored.tags)
-        assertEquals(9L, restored.parentId)
+        // 父节点引用以 parentUuid 传输，本机 parentId 由 SyncManager 应用时回填
+        val raw = JSONObject(SyncJson.recordToJson(r, "baby-u", "parent-u"))
+        assertEquals("parent-u", raw.optString("parentUuid"))
     }
 
     @Test
     fun `同步序列化无父节点时保留空`() {
         val r = photo(8)
-        val restored = SyncJson.recordFromJson(JSONObject(SyncJson.recordToJson(r)))
+        val restored = SyncJson.recordFromJson(JSONObject(SyncJson.recordToJson(r, "baby-u", null)))
         assertNull(restored.parentId)
     }
 }

@@ -123,8 +123,8 @@ fun GrowthChartScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .background(Card, RoundedCornerShape(20.dp))
-                .padding(12.dp)
+                .background(Card, RoundedCornerShape(18.dp))
+                .padding(16.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 LegendDot(Mint, "P50")

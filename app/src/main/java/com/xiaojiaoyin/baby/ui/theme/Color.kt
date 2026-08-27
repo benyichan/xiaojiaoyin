@@ -18,3 +18,13 @@ val Pink = Color(0xFFD96A9C)
 val PinkLight = Color(0xFFFDEBF2)
 val Blue = Color(0xFF4A7FC0)
 val BlueLight = Color(0xFFE8F1FF)
+
+/** 语义红（删除/错误/促销强调），对齐收纳管家色板 */
+val Red = Color(0xFFD64545)
+val RedLight = Color(0xFFFDE8E8)
+
+/** 照片占位底色 */
+val PhotoPlaceholderBg = Color(0xFFE3EEE8)
+
+/** 免费版标签底色 */
+val FreeTagBg = Color(0xFFF0F0EC)

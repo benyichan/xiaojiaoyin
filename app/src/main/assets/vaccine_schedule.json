@@ -1,0 +1,28 @@
+{
+  "version": "国家免疫规划疫苗儿童免疫程序（2021 版）",
+  "doses": [
+    { "key": "hepB-1", "vaccine": "乙肝疫苗", "doseLabel": "第1剂", "ageLabel": "出生时", "ageMonths": 0 },
+    { "key": "bcg-1", "vaccine": "卡介苗", "doseLabel": "第1剂", "ageLabel": "出生时", "ageMonths": 0 },
+    { "key": "hepB-2", "vaccine": "乙肝疫苗", "doseLabel": "第2剂", "ageLabel": "1 月龄", "ageMonths": 1 },
+    { "key": "ipv-1", "vaccine": "脊灰灭活疫苗", "doseLabel": "第1剂", "ageLabel": "2 月龄", "ageMonths": 2 },
+    { "key": "ipv-2", "vaccine": "脊灰灭活疫苗", "doseLabel": "第2剂", "ageLabel": "3 月龄", "ageMonths": 3 },
+    { "key": "dtp-1", "vaccine": "百白破疫苗", "doseLabel": "第1剂", "ageLabel": "3 月龄", "ageMonths": 3 },
+    { "key": "opv-1", "vaccine": "脊灰减毒疫苗", "doseLabel": "第3剂", "ageLabel": "4 月龄", "ageMonths": 4 },
+    { "key": "dtp-2", "vaccine": "百白破疫苗", "doseLabel": "第2剂", "ageLabel": "4 月龄", "ageMonths": 4 },
+    { "key": "opv-2", "vaccine": "脊灰减毒疫苗", "doseLabel": "第4剂", "ageLabel": "5 月龄", "ageMonths": 5 },
+    { "key": "dtp-3", "vaccine": "百白破疫苗", "doseLabel": "第3剂", "ageLabel": "5 月龄", "ageMonths": 5 },
+    { "key": "hepB-3", "vaccine": "乙肝疫苗", "doseLabel": "第3剂", "ageLabel": "6 月龄", "ageMonths": 6 },
+    { "key": "mpsvA-1", "vaccine": "流脑A群多糖", "doseLabel": "第1剂", "ageLabel": "6 月龄", "ageMonths": 6 },
+    { "key": "mr-1", "vaccine": "麻腮风疫苗", "doseLabel": "第1剂", "ageLabel": "8 月龄", "ageMonths": 8 },
+    { "key": "jeL-1", "vaccine": "乙脑减毒疫苗", "doseLabel": "第1剂", "ageLabel": "8 月龄", "ageMonths": 8 },
+    { "key": "mpsvA-2", "vaccine": "流脑A群多糖", "doseLabel": "第2剂", "ageLabel": "9 月龄", "ageMonths": 9 },
+    { "key": "dtp-4", "vaccine": "百白破疫苗", "doseLabel": "第4剂", "ageLabel": "18 月龄", "ageMonths": 18 },
+    { "key": "mr-2", "vaccine": "麻腮风疫苗", "doseLabel": "第2剂", "ageLabel": "18 月龄", "ageMonths": 18 },
+    { "key": "hepAL-1", "vaccine": "甲肝减毒疫苗", "doseLabel": "第1剂", "ageLabel": "18 月龄", "ageMonths": 18 },
+    { "key": "jeL-2", "vaccine": "乙脑减毒疫苗", "doseLabel": "第2剂", "ageLabel": "2 周岁", "ageMonths": 24 },
+    { "key": "mpsvAC-1", "vaccine": "流脑A+C多糖", "doseLabel": "第1剂", "ageLabel": "3 周岁", "ageMonths": 36 },
+    { "key": "opv-3", "vaccine": "脊灰减毒疫苗", "doseLabel": "加强", "ageLabel": "4 周岁", "ageMonths": 48 },
+    { "key": "dt-1", "vaccine": "白破疫苗", "doseLabel": "加强", "ageLabel": "6 周岁", "ageMonths": 72 },
+    { "key": "mpsvAC-2", "vaccine": "流脑A+C多糖", "doseLabel": "第2剂", "ageLabel": "6 周岁", "ageMonths": 72 }
+  ]
+}

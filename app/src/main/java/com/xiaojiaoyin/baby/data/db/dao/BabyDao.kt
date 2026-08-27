@@ -20,6 +20,9 @@ interface BabyDao {
     @Query("SELECT * FROM baby WHERE id = :id")
     suspend fun getById(id: Long): BabyEntity?
 
+    @Query("SELECT * FROM baby WHERE uuid = :uuid")
+    suspend fun getByUuid(uuid: String): BabyEntity?
+
     @Insert
     suspend fun insert(baby: BabyEntity): Long
 

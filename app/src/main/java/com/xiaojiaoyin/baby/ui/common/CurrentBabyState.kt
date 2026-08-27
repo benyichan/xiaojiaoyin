@@ -2,6 +2,7 @@ package com.xiaojiaoyin.baby.ui.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
 import kotlinx.coroutines.flow.combine
@@ -12,9 +13,12 @@ import kotlinx.coroutines.flow.combine
  */
 @Composable
 fun rememberCurrentBabyId(): State<Long?> {
-    return combine(
-        AppGraph.settingsRepository.currentBabyId,
-        AppGraph.babyRepository.observeAll()
-    ) { id, babies -> id ?: babies.firstOrNull()?.id }
-        .collectAsStateWithLifecycle(initialValue = null)
+    // remember 固定 Flow 实例：combine 每次重组新建实例会导致反复重启 Room/DataStore 收集
+    val flow = remember {
+        combine(
+            AppGraph.settingsRepository.currentBabyId,
+            AppGraph.babyRepository.observeAll()
+        ) { id, babies -> id ?: babies.firstOrNull()?.id }
+    }
+    return flow.collectAsStateWithLifecycle(initialValue = null)
 }

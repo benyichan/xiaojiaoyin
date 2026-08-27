@@ -8,9 +8,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -50,6 +53,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 private const val DEV_EMAIL = "benyi@aliyun.com"
 
@@ -130,13 +134,17 @@ fun PurchaseScreen(onBack: () -> Unit) {
             color = TextPrimary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         )
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+        ) {
             PriceCard(
                 title = "月度",
                 price = "¥6.8 / 月",
                 desc = "随时停用",
                 selected = selectedPlan == "M",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).fillMaxHeight()
             ) { selectedPlan = "M" }
             PriceCard(
                 title = "年度",
@@ -144,14 +152,14 @@ fun PurchaseScreen(onBack: () -> Unit) {
                 desc = if (promoActive) "原价 ¥76.9 · 限时 77 折" else "12 个月",
                 selected = selectedPlan == "Y",
                 promo = true,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).fillMaxHeight()
             ) { selectedPlan = "Y" }
             PriceCard(
                 title = "永久",
                 price = "¥159",
                 desc = "一次买断",
                 selected = selectedPlan == "L",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).fillMaxHeight()
             ) { selectedPlan = "L" }
         }
         if (promoActive) {
@@ -159,7 +167,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
                 "限时促销 77 折 · 剩余 ${formatCountdown(remainingMs)}",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFFD96A6A),
+                color = Red,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
             )
         }
@@ -275,8 +283,8 @@ fun PurchaseScreen(onBack: () -> Unit) {
                 singleLine = true,
                 shape = RoundedCornerShape(14.dp),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFF5FBF8),
-                    unfocusedContainerColor = Color(0xFFF5FBF8),
+                    focusedContainerColor = Card,
+                    unfocusedContainerColor = Card,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
                 ),
@@ -314,7 +322,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
             Text(
                 it,
                 fontSize = 13.sp,
-                color = if (it.startsWith("激活成功")) Mint else Color(0xFFD96A6A),
+                color = if (it.startsWith("激活成功")) Mint else Red,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
@@ -374,7 +382,7 @@ private fun PriceCard(
             price,
             fontSize = 18.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = if (promo && selected) Color(0xFFD96A6A) else Mint,
+            color = if (promo && selected) Red else Mint,
             modifier = Modifier.padding(top = 4.dp)
         )
         Text(desc, fontSize = 11.sp, color = TextSecondary, modifier = Modifier.padding(top = 2.dp))

@@ -74,7 +74,7 @@ fun AnnivScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .background(Card, RoundedCornerShape(20.dp))
+                    .background(Card, RoundedCornerShape(18.dp))
                     .padding(20.dp)
             ) {
                 Text(
@@ -103,7 +103,7 @@ fun AnnivScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
                             .fillMaxWidth()
                             .padding(vertical = 5.dp)
                             .background(Card, RoundedCornerShape(18.dp))
-                            .padding(13.dp)
+                            .padding(16.dp)
                     ) {
                         TypeTag(kindOf(r.type), labelOf(r.type))
                         Column(

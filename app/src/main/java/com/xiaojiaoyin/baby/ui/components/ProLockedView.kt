@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.xiaojiaoyin.baby.ui.theme.Gold
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
+import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 
 /** 免费版锁定页：提示升级 Pro */
 @Composable
@@ -41,7 +42,7 @@ fun ProLockedView(title: String, desc: String, onUpgrade: () -> Unit) {
             title,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = androidx.compose.ui.graphics.Color(0xFF2F463D),
+            color = TextPrimary,
             modifier = Modifier.padding(top = 16.dp)
         )
         Text(
@@ -58,7 +59,7 @@ fun ProLockedView(title: String, desc: String, onUpgrade: () -> Unit) {
             color = Color.White,
             modifier = Modifier
                 .padding(top = 24.dp)
-                .background(Mint, RoundedCornerShape(16.dp))
+                .background(Mint, RoundedCornerShape(14.dp))
                 .clickable(onClick = onUpgrade)
                 .padding(horizontal = 40.dp, vertical = 13.dp)
         )

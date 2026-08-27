@@ -1,5 +1,6 @@
-package com.xiaojiaoyin.baby.ui.screens
+﻿package com.xiaojiaoyin.baby.ui.screens
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -52,10 +54,14 @@ import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
+import com.xiaojiaoyin.baby.ui.theme.PhotoPlaceholderBg
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @Composable
 fun GrowthScreen(onAddNode: () -> Unit, onEditNode: (Long) -> Unit) {
@@ -220,7 +226,7 @@ fun GrowthScreen(onAddNode: () -> Unit, onEditNode: (Long) -> Unit) {
                             AppGraph.recordRepository.delete(previewNode)
                         }
                         previewId = null
-                    }) { Text("删除", color = Color(0xFFD96A6A)) }
+                    }) { Text("删除", color = Red) }
                 }
             }
         )
@@ -228,10 +234,12 @@ fun GrowthScreen(onAddNode: () -> Unit, onEditNode: (Long) -> Unit) {
 
     val fullPhoto = previewPhotos.firstOrNull { it.detailJsonPath() == fullPhotoPath }
     if (fullPhoto != null) {
-        val bitmap = remember(fullPhoto.id) {
+        val bitmap by produceState<Bitmap?>(null, fullPhoto.id) {
             val p = fullPhoto.detailJsonPath()
-            if (p.isBlank()) null
-            else BitmapFactory.decodeFile(PhotoStorage.loadFile(context, p).absolutePath)
+            value = if (p.isBlank()) null
+            else withContext(Dispatchers.IO) {
+                BitmapFactory.decodeFile(PhotoStorage.loadFile(context, p).absolutePath)
+            }
         }
         AlertDialog(
             onDismissRequest = { fullPhotoPath = null },
@@ -309,16 +317,18 @@ private fun NodePhotoThumb(
     onClick: () -> Unit
 ) {
     val path = record.detailJsonPath()
-    val bitmap = remember(record.id) {
-        if (path.isBlank()) null
-        else BitmapFactory.decodeFile(PhotoStorage.loadFile(context, path).absolutePath)
+    val bitmap by produceState<Bitmap?>(null, record.id, path) {
+        value = if (path.isBlank()) null
+        else withContext(Dispatchers.IO) {
+            PhotoStorage.decodeThumb(PhotoStorage.loadFile(context, path))
+        }
     }
     Box(
         modifier = Modifier
             .size(56.dp)
             .aspectRatio(1f)
             .clip(RoundedCornerShape(10.dp))
-            .background(Color(0xFFE3EEE8))
+            .background(PhotoPlaceholderBg)
             .clickable(onClick = onClick)
     ) {
         bitmap?.let {

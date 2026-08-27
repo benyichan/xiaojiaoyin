@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -31,7 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
+import com.xiaojiaoyin.baby.data.PhotoStorage
 import com.xiaojiaoyin.baby.data.db.entity.BabyEntity
+import com.xiaojiaoyin.baby.reminder.BirthdayScheduler
 import com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId
 import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
@@ -43,6 +46,7 @@ import com.xiaojiaoyin.baby.ui.theme.MintLight
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @Composable
 fun BabyManageScreen(
@@ -53,6 +57,7 @@ fun BabyManageScreen(
     onUpgrade: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val babies by AppGraph.babyRepository.observeAll()
         .collectAsStateWithLifecycle(initialValue = emptyList())
     val currentBabyId by rememberCurrentBabyId()
@@ -159,7 +164,7 @@ fun BabyManageScreen(
                         "删除",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFD96A6A),
+                        color = Red,
                         modifier = Modifier
                             .padding(start = 10.dp)
                             .clickable { deleteTarget = baby }
@@ -177,14 +182,19 @@ fun BabyManageScreen(
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch {
-                        AppGraph.babyRepository.delete(target)
+                        // 级联删除：事务内删全部子表数据，随后清理照片文件
+                        val photoPaths = AppGraph.babyRepository.deleteCascade(target)
+                        photoPaths.forEach { PhotoStorage.delete(context, it) }
+                        if (target.avatarPath.isNotBlank()) PhotoStorage.delete(context, target.avatarPath)
+                        BirthdayScheduler(context.applicationContext).cancelForBaby(target.id)
+                        runCatching { com.xiaojiaoyin.baby.reminder.VaccineScheduler(context.applicationContext).cancelForBaby(target.id) }
                         if (target.id == currentBabyId) {
                             val rest = babies.filter { it.id != target.id }
                             rest.firstOrNull()?.let { AppGraph.settingsRepository.setCurrentBaby(it.id) }
                         }
                     }
                     deleteTarget = null
-                }) { Text("删除", color = Color(0xFFD96A6A)) }
+                }) { Text("删除", color = Red) }
             },
             dismissButton = {
                 TextButton(onClick = { deleteTarget = null }) { Text("取消") }

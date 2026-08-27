@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,13 +94,13 @@ fun MedicalFormScreen(onBack: () -> Unit) {
             placeholder = "如 120（选填）"
         )
         error?.let {
-            Text(it, fontSize = 12.sp, color = Color(0xFFD96A6A), modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+            Text(it, fontSize = 12.sp, color = Red, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 16.dp)
-                .background(Mint, RoundedCornerShape(16.dp))
+                .background(Mint, RoundedCornerShape(14.dp))
                 .clickable {
                     if (title.isBlank()) {
                         error = "请填写标题"

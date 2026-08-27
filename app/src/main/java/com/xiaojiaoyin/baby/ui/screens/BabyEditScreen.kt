@@ -1,5 +1,8 @@
 package com.xiaojiaoyin.baby.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,13 +33,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.xiaojiaoyin.baby.data.AppGraph
+import com.xiaojiaoyin.baby.data.PhotoStorage
 import com.xiaojiaoyin.baby.data.db.entity.BabyEntity
+import com.xiaojiaoyin.baby.reminder.BirthdayScheduler
 import com.xiaojiaoyin.baby.ui.components.FormField
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
 import com.xiaojiaoyin.baby.ui.components.SegmentedField
@@ -50,22 +59,35 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import com.xiaojiaoyin.baby.data.settings.ProStatusRepository
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     var editingBaby by remember { mutableStateOf<BabyEntity?>(null) }
     var name by remember { mutableStateOf("") }
     var nickname by remember { mutableStateOf("") }
     var genderIndex by remember { mutableStateOf(0) }
     var birthMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    var avatarPath by remember { mutableStateOf("") }
     var showDate by remember { mutableStateOf(false) }
     var showTime by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
     val zone = ZoneId.of("Asia/Shanghai")
     val birthTime = Instant.ofEpochMilli(birthMillis).atZone(zone)
+
+    val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            val newPath = PhotoStorage.saveAvatar(context, uri)
+            if (newPath != null) {
+                if (avatarPath.isNotEmpty()) PhotoStorage.delete(context, avatarPath)
+                avatarPath = newPath
+            }
+        }
+    }
 
     LaunchedEffect(babyId) {
         if (babyId != null) {
@@ -76,6 +98,7 @@ fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
                 nickname = baby.nickname
                 genderIndex = if (baby.gender == "男") 1 else 0
                 birthMillis = baby.birthDateTime
+                avatarPath = baby.avatarPath
             }
         }
     }
@@ -89,19 +112,54 @@ fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
     ) {
         OverlayHeader(if (babyId == null) "添加宝宝" else "编辑档案", onBack)
 
-        Box(
+        // 头像：点击从相册选择；无照片时显示名字首字
+        val avatarBmp = if (avatarPath.isNotEmpty()) {
+            remember(avatarPath) {
+                PhotoStorage.decodeThumb(PhotoStorage.loadFile(context, avatarPath), 160)
+            }
+        } else null
+        Column(
             modifier = Modifier
-                .padding(top = 10.dp)
-                .size(72.dp)
-                .align(Alignment.CenterHorizontally)
-                .background(MintLight, CircleShape),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(top = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .clickable { avatarPicker.launch(arrayOf("image/*")) },
+                contentAlignment = Alignment.Center
+            ) {
+                if (avatarBmp != null) {
+                    Image(
+                        bitmap = avatarBmp.asImageBitmap(),
+                        contentDescription = "头像",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .background(MintLight, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = name.take(1).ifEmpty { "宝" },
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Mint
+                        )
+                    }
+                }
+            }
             Text(
-                text = name.take(1).ifEmpty { "宝" },
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Mint
+                text = if (avatarPath.isEmpty()) "点击设置头像" else "点击更换头像",
+                fontSize = 11.sp,
+                color = TextSecondary,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
 
@@ -136,7 +194,7 @@ fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
             Text(
                 text = it,
                 fontSize = 12.sp,
-                color = androidx.compose.ui.graphics.Color(0xFFD96A6A),
+                color = Red,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
             )
         }
@@ -145,7 +203,7 @@ fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 16.dp)
-                .background(Mint, RoundedCornerShape(16.dp))
+                .background(Mint, RoundedCornerShape(14.dp))
                 .clickable {
                     if (name.isBlank()) {
                         error = "请填写姓名"
@@ -153,14 +211,16 @@ fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
                     }
                     scope.launch {
                         if (editingBaby != null) {
-                            AppGraph.babyRepository.update(
-                                editingBaby!!.copy(
-                                    name = name.trim(),
-                                    nickname = nickname.trim(),
-                                    gender = if (genderIndex == 0) "女" else "男",
-                                    birthDateTime = birthMillis
-                                )
+                            val updated = editingBaby!!.copy(
+                                name = name.trim(),
+                                nickname = nickname.trim(),
+                                gender = if (genderIndex == 0) "女" else "男",
+                                birthDateTime = birthMillis,
+                                avatarPath = avatarPath
                             )
+                            AppGraph.babyRepository.update(updated)
+                            BirthdayScheduler(context.applicationContext).scheduleForBaby(updated)
+                            runCatching { com.xiaojiaoyin.baby.reminder.VaccineScheduler(context.applicationContext).scheduleForBaby(updated) }
                         } else {
                             val existing = AppGraph.babyRepository.getAll()
                             val isPro = AppGraph.proStatusRepository.isPro.first()
@@ -174,16 +234,19 @@ fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
                                 error = "免费版只能记录一个宝宝，升级 Pro 可添加多个"
                                 return@launch
                             }
-                            val id = AppGraph.babyRepository.add(
-                                BabyEntity(
-                                    name = name.trim(),
-                                    nickname = nickname.trim(),
-                                    gender = if (genderIndex == 0) "女" else "男",
-                                    birthDateTime = birthMillis,
-                                    avatarColorIndex = 0,
-                                    createdAt = System.currentTimeMillis()
-                                )
+                            val baby = BabyEntity(
+                                name = name.trim(),
+                                nickname = nickname.trim(),
+                                gender = if (genderIndex == 0) "女" else "男",
+                                birthDateTime = birthMillis,
+                                avatarColorIndex = 0,
+                                avatarPath = avatarPath,
+                                createdAt = System.currentTimeMillis(),
+                                updatedAt = System.currentTimeMillis()
                             )
+                            val id = AppGraph.babyRepository.add(baby)
+                            BirthdayScheduler(context.applicationContext).scheduleForBaby(baby.copy(id = id))
+                            runCatching { com.xiaojiaoyin.baby.reminder.VaccineScheduler(context.applicationContext).scheduleForBaby(baby.copy(id = id)) }
                             if (AppGraph.settingsRepository.getCurrentBabyId() == null) {
                                 AppGraph.settingsRepository.setCurrentBaby(id)
                             }
@@ -211,8 +274,11 @@ fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
                 TextButton(onClick = {
                     dateState.selectedDateMillis?.let { selected ->
                         val date = Instant.ofEpochMilli(selected).atZone(zone).toLocalDate()
+                        // 出生时间不能在未来：选了未来日期则钳制为今天
+                        val today = java.time.LocalDate.now(zone)
+                        val clamped = if (date.isAfter(today)) today else date
                         val old = Instant.ofEpochMilli(birthMillis).atZone(zone)
-                        birthMillis = date.atTime(old.hour, old.minute).atZone(zone).toInstant().toEpochMilli()
+                        birthMillis = clamped.atTime(old.hour, old.minute).atZone(zone).toInstant().toEpochMilli()
                     }
                     showDate = false
                 }) { Text("确定") }

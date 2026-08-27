@@ -1,7 +1,9 @@
 package com.xiaojiaoyin.baby.data.repository
 
+import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.data.db.dao.GoodItemDao
 import com.xiaojiaoyin.baby.data.db.entity.GoodItemEntity
+import com.xiaojiaoyin.baby.data.db.entity.SyncTombstoneEntity
 import kotlinx.coroutines.flow.Flow
 
 class GoodItemRepository(private val dao: GoodItemDao) {
@@ -25,11 +27,17 @@ class GoodItemRepository(private val dao: GoodItemDao) {
                 rating = rating,
                 note = note,
                 buyDate = buyDate,
-                createdAt = System.currentTimeMillis()
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
             )
         )
 
-    suspend fun update(item: GoodItemEntity) = dao.update(item)
+    suspend fun update(item: GoodItemEntity) =
+        dao.update(item.copy(updatedAt = System.currentTimeMillis()))
 
-    suspend fun delete(item: GoodItemEntity) = dao.delete(item)
+    suspend fun delete(item: GoodItemEntity) {
+        AppGraph.database.syncTombstoneDao()
+            .upsert(SyncTombstoneEntity("good", item.uuid, System.currentTimeMillis()))
+        dao.delete(item)
+    }
 }

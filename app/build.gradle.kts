@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.navigation3.ui)
     implementation(libs.lunar)
     implementation(libs.billing)
+    implementation(libs.androidx.glance.appwidget)
     testImplementation(libs.junit)
     testImplementation("org.json:json:20240303")
     debugImplementation(libs.compose.ui.tooling)

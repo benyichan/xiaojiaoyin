@@ -37,6 +37,7 @@ import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @Composable
 fun BackupScreen(onBack: () -> Unit) {
@@ -87,7 +88,7 @@ fun BackupScreen(onBack: () -> Unit) {
             Text(
                 text = it,
                 fontSize = 13.sp,
-                color = if (it.startsWith("备份完成")) Mint else Color(0xFFD96A6A),
+                color = if (it.startsWith("备份完成")) Mint else Red,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
             )
         }

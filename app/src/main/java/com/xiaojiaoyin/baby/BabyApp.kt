@@ -5,6 +5,9 @@ import android.content.ContentValues
 import android.os.Environment
 import android.provider.MediaStore
 import com.xiaojiaoyin.baby.data.AppGraph
+import com.xiaojiaoyin.baby.reminder.BirthdayScheduler
+import com.xiaojiaoyin.baby.reminder.ReminderScheduler
+import com.xiaojiaoyin.baby.reminder.VaccineScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,6 +22,24 @@ class BabyApp : Application() {
         installCrashLogger()
         CoroutineScope(Dispatchers.IO).launch {
             AppGraph.proStatusRepository.ensureTrialStarted()
+            runCatching {
+                BirthdayScheduler(this@BabyApp).scheduleAll()
+            }.onFailure {
+                android.util.Log.e("BirthdayScheduler", "scheduleAll failed", it)
+            }
+            // force-stop / 被杀进程会清掉全部闹钟：启动时重排待办提醒。
+            // 已过期的会立即触发补发一次（remindedAt 防止之后重复骚扰）
+            runCatching {
+                val scheduler = ReminderScheduler(this@BabyApp)
+                AppGraph.todoRepository.pendingReminders().forEach { scheduler.schedule(it) }
+            }.onFailure {
+                android.util.Log.e("ReminderScheduler", "reschedule failed", it)
+            }
+            runCatching {
+                VaccineScheduler(this@BabyApp).scheduleAll()
+            }.onFailure {
+                android.util.Log.e("VaccineScheduler", "reschedule failed", it)
+            }
         }
     }
 

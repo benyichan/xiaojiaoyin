@@ -6,7 +6,7 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 object FeedRules {
-    private const val DAY_MS = 24L * 60 * 60 * 1000
+    const val DAY_MS = 24L * 60 * 60 * 1000
     const val AUTO_HIDE_GAP_DAYS = 60L
 
     /** 各类型活跃月龄上限；不在表中的类型永远活跃 */

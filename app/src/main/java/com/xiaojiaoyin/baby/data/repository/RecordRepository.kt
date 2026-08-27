@@ -1,8 +1,10 @@
 package com.xiaojiaoyin.baby.data.repository
 
+import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.data.db.dao.RecordDao
 import com.xiaojiaoyin.baby.data.db.entity.RecordEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordType
+import com.xiaojiaoyin.baby.data.db.entity.SyncTombstoneEntity
 import kotlinx.coroutines.flow.Flow
 
 class RecordRepository(private val dao: RecordDao) {
@@ -44,9 +46,13 @@ class RecordRepository(private val dao: RecordDao) {
     suspend fun lastOfType(babyId: Long, type: RecordType): RecordEntity? =
         dao.lastOfType(babyId, type)
 
-    suspend fun delete(record: RecordEntity) = dao.delete(record)
+    suspend fun delete(record: RecordEntity) {
+        AppGraph.database.syncTombstoneDao()
+            .upsert(SyncTombstoneEntity("record", record.uuid, System.currentTimeMillis()))
+        dao.delete(record)
+    }
 
-    suspend fun update(record: RecordEntity) = dao.update(record)
+    suspend fun update(record: RecordEntity) = updateWithTimestamp(record)
 
     /** 更新记录时刷新 updatedAt，供同步合并使用 */
     suspend fun updateWithTimestamp(record: RecordEntity): Unit =

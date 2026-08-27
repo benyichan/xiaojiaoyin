@@ -1,5 +1,6 @@
-package com.xiaojiaoyin.baby.ui.screens
+﻿package com.xiaojiaoyin.baby.ui.screens
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,8 +31,9 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -55,12 +57,16 @@ import com.xiaojiaoyin.baby.ui.components.TextInputField
 import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import com.xiaojiaoyin.baby.ui.theme.PhotoPlaceholderBg
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -178,13 +184,13 @@ fun NodeFormScreen(nodeId: Long?, onBack: () -> Unit, onUpgrade: () -> Unit) {
                 }
         )
         error?.let {
-            Text(it, fontSize = 12.sp, color = Color(0xFFD96A6A), modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+            Text(it, fontSize = 12.sp, color = Red, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 16.dp)
-                .background(Mint, RoundedCornerShape(16.dp))
+                .background(Mint, RoundedCornerShape(14.dp))
                 .clickable {
                     if (title.isBlank()) {
                         error = "请填写标题"
@@ -326,9 +332,11 @@ private fun NodeFormPhotoThumb(
     path: String,
     onDelete: () -> Unit
 ) {
-    val bitmap = remember(path) {
-        if (path.isBlank()) null
-        else BitmapFactory.decodeFile(PhotoStorage.loadFile(context, path).absolutePath)
+    val bitmap by produceState<Bitmap?>(null, path) {
+        value = if (path.isBlank()) null
+        else withContext(Dispatchers.IO) {
+            PhotoStorage.decodeThumb(PhotoStorage.loadFile(context, path))
+        }
     }
     Box {
         Box(
@@ -336,7 +344,7 @@ private fun NodeFormPhotoThumb(
                 .size(72.dp)
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFE3EEE8))
+                .background(PhotoPlaceholderBg)
         ) {
             bitmap?.let {
                 Image(
@@ -352,7 +360,7 @@ private fun NodeFormPhotoThumb(
                 .align(Alignment.TopEnd)
                 .padding(3.dp)
                 .size(20.dp)
-                .clip(RoundedCornerShape(50))
+                .clip(RoundedCornerShape(50.dp))
                 .background(Color.Black.copy(alpha = 0.55f))
                 .clickable(onClick = onDelete),
             contentAlignment = Alignment.Center

@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +49,7 @@ import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import java.net.Inet4Address
 import java.net.NetworkInterface
 import kotlinx.coroutines.launch
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @Composable
 fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
@@ -70,8 +72,13 @@ fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
             val merged = SyncMerger.mergeChanges(syncManager.extractChanges(), remote)
             android.util.Log.d("Sync", "merged=${merged.size}")
             syncManager.applyChanges(merged)
+            syncManager.clearTombstonesConfirmed(merged)
             SyncMerger.bundleToJson(merged)
         }
+    }
+    // 离开页面必须释放 ServerSocket，否则僵尸服务继续监听并在后台收包合并写库
+    DisposableEffect(Unit) {
+        onDispose { network.stop() }
     }
     var status by remember { mutableStateOf("未启动") }
     var port by remember { mutableStateOf<Int?>(null) }
@@ -106,6 +113,7 @@ fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
                     val remote = SyncMerger.bundleFromJson(text)
                     val merged = SyncMerger.mergeChanges(syncManager.extractChanges(), remote)
                     syncManager.applyChanges(merged)
+                    syncManager.clearTombstonesConfirmed(merged)
                     "导入合并完成：${merged.size} 条数据"
                 }.getOrElse { "导入失败：${it.message}" }
             }
@@ -240,6 +248,7 @@ fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
                                 val mergedJson = SyncNetwork.sendBundle(targetIp.trim(), portNum, local)
                                 val merged = SyncMerger.bundleFromJson(mergedJson)
                                 syncManager.applyChanges(merged)
+                                syncManager.clearTombstonesConfirmed(merged)
                                 "同步完成：双方 ${merged.size} 条数据一致"
                             }.getOrElse { "同步失败：${it.message}" }
                         }
@@ -271,7 +280,7 @@ fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
             Text(
                 it,
                 fontSize = 13.sp,
-                color = if (it.startsWith("同步完成") || it.startsWith("导入") || it.startsWith("接收") || it.contains("导出")) Mint else Color(0xFFD96A6A),
+                color = if (it.startsWith("同步完成") || it.startsWith("导入") || it.startsWith("接收") || it.contains("导出")) Mint else Red,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
             )
         }

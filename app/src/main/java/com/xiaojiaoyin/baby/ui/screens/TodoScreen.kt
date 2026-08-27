@@ -56,6 +56,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
+import com.xiaojiaoyin.baby.ui.theme.Red
+import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,7 +157,7 @@ fun TodoScreen(onBack: () -> Unit) {
                                 text = todo.title,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (todo.completed) TextSecondary else androidx.compose.ui.graphics.Color(0xFF2F463D),
+                                color = if (todo.completed) TextSecondary else TextPrimary,
                                 textDecoration = if (todo.completed) androidx.compose.ui.text.style.TextDecoration.LineThrough else null
                             )
                             Text(
@@ -252,7 +254,7 @@ fun TodoScreen(onBack: () -> Unit) {
                         scheduler.cancel(target.id)
                     }
                     pendingDelete = null
-                }) { Text("删除", color = Color(0xFFD96A6A)) }
+                }) { Text("删除", color = Red) }
             },
             dismissButton = {
                 TextButton(onClick = { pendingDelete = null }) { Text("取消") }
@@ -286,29 +288,7 @@ private fun AddTodoForm(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 30.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Mint, RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
-                .padding(horizontal = 16.dp, vertical = 18.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "‹ 返回",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
-                    modifier = Modifier.clickable(onClick = onBack)
-                )
-                Text(
-                    if (todo == null) "新建待办" else "编辑待办",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color.White,
-                    modifier = Modifier.padding(start = 14.dp)
-                )
-            }
-        }
+        OverlayHeader(if (todo == null) "新建待办" else "编辑待办", onBack)
         TextInputField(
             label = "标题 *",
             value = title,
@@ -339,7 +319,7 @@ private fun AddTodoForm(
             Switch(checked = remind, onCheckedChange = { remind = it })
         }
         error?.let {
-            Text(it, fontSize = 12.sp, color = Color(0xFFD96A6A), modifier = Modifier.padding(horizontal = 16.dp))
+            Text(it, fontSize = 12.sp, color = Red, modifier = Modifier.padding(horizontal = 16.dp))
         }
         SaveButton("保存") {
             if (title.isBlank()) {

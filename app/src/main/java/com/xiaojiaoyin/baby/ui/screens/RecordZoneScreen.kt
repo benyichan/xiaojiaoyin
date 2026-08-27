@@ -44,6 +44,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @Composable
 fun FeedingZoneScreen(onBack: () -> Unit, onAdd: () -> Unit) {
@@ -177,7 +178,7 @@ private fun RecordZoneScreen(
                 TextButton(onClick = {
                     scope.launch { AppGraph.recordRepository.delete(preview) }
                     previewId = null
-                }) { Text("删除", color = Color(0xFFD96A6A)) }
+                }) { Text("删除", color = Red) }
             }
         )
     }

@@ -13,18 +13,29 @@ class ReminderScheduler(private val context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent = buildPendingIntent(todo.id, todo.title)
         val canExact = Build.VERSION.SDK_INT < 31 || alarmManager.canScheduleExactAlarms()
-        if (canExact) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                todo.timeAt,
-                pendingIntent
-            )
-        } else {
-            // 精确闹钟权限不可用时用 setAlarmClock 兜底：闹钟语义必达，无需 SCHEDULE_EXACT_ALARM
-            alarmManager.setAlarmClock(
-                AlarmManager.AlarmClockInfo(todo.timeAt, pendingIntent),
-                pendingIntent
-            )
+        try {
+            if (canExact) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    todo.timeAt,
+                    pendingIntent
+                )
+            } else {
+                // Android 12+ 的 setAlarmClock 同样受精确闹钟权限限制，先试闹钟语义，失败再降级非精确
+                runCatching {
+                    alarmManager.setAlarmClock(
+                        AlarmManager.AlarmClockInfo(todo.timeAt, pendingIntent),
+                        pendingIntent
+                    )
+                }.onFailure {
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, todo.timeAt, pendingIntent)
+                }
+            }
+        } catch (t: Throwable) {
+            android.util.Log.e("Reminder", "schedule failed, fallback to inexact", t)
+            runCatching {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, todo.timeAt, pendingIntent)
+            }
         }
     }
 

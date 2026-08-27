@@ -46,6 +46,7 @@ import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @Composable
 fun SchoolScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) {
@@ -174,7 +175,7 @@ fun SchoolScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) {
                 TextButton(onClick = {
                     scope.launch { AppGraph.schoolStageRepository.delete(preview) }
                     previewId = null
-                }) { Text("删除", color = Color(0xFFD96A6A)) }
+                }) { Text("删除", color = Red) }
             }
         )
     }

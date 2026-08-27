@@ -13,16 +13,24 @@ import kotlinx.coroutines.flow.combine
 /** Pro 会员或 7 天试用期内均为解锁状态 */
 @Composable
 fun rememberProUnlocked(): State<Boolean> {
-    return combine(
-        AppGraph.proStatusRepository.isPro,
-        AppGraph.proStatusRepository.trialStartAt
-    ) { isPro, trialStart ->
-        isPro || (
-            trialStart > 0 &&
-                System.currentTimeMillis() <
-                trialStart + ProStatusRepository.TRIAL_DAYS * ProStatusRepository.DAY_MS
-            )
-    }.collectAsStateWithLifecycle(initialValue = false)
+    // remember 固定 Flow 实例：combine 每次重组新建实例会导致 collectAsStateWithLifecycle
+    // 反复取消并重启收集，状态瞬时闪回 initialValue
+    val flow = remember {
+        combine(
+            AppGraph.proStatusRepository.isPro,
+            AppGraph.proStatusRepository.proExpireAt,
+            AppGraph.proStatusRepository.trialStartAt
+        ) { isPro, expireAt, trialStart ->
+            val now = System.currentTimeMillis()
+            // expireAt == 0L 表示永久（买断/赠送码）；月卡/年卡到期后回落为非 Pro。
+            // 注意：now 在 Flow 发射时取值，到期切换在下次启动或状态变更时生效
+            val proValid = isPro && (expireAt == 0L || now < expireAt)
+            val trialValid = trialStart > 0 &&
+                now < trialStart + ProStatusRepository.TRIAL_DAYS * ProStatusRepository.DAY_MS
+            proValid || trialValid
+        }
+    }
+    return flow.collectAsStateWithLifecycle(initialValue = false)
 }
 
 /** 试用剩余天数（0 表示试用已结束或未开始） */

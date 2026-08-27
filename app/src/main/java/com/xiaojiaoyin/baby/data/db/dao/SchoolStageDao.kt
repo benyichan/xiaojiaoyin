@@ -14,6 +14,9 @@ interface SchoolStageDao {
     @Query("SELECT * FROM school_stage WHERE babyId = :babyId ORDER BY startAt ASC")
     fun observeAll(babyId: Long): Flow<List<SchoolStageEntity>>
 
+    @Query("SELECT * FROM school_stage WHERE uuid = :uuid")
+    suspend fun getByUuid(uuid: String): SchoolStageEntity?
+
     @Query("SELECT * FROM school_stage")
     suspend fun getAllAll(): List<SchoolStageEntity>
 
@@ -22,6 +25,9 @@ interface SchoolStageDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(stages: List<SchoolStageEntity>)
+
+    @Query("DELETE FROM school_stage WHERE babyId = :babyId")
+    suspend fun deleteByBabyId(babyId: Long)
 
     @Update
     suspend fun update(stage: SchoolStageEntity)

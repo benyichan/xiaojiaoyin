@@ -14,8 +14,20 @@ private val Context.dataStore by preferencesDataStore(name = "settings")
 class SettingsRepository(private val context: Context) {
     private val keyCurrentBaby = longPreferencesKey("current_baby_id")
     private val keyTypeVisibility = stringPreferencesKey("record_type_visibility")
+    private val keyFeedingTimerStart = longPreferencesKey("feeding_timer_start")
 
     val currentBabyId: Flow<Long?> = context.dataStore.data.map { it[keyCurrentBaby] }
+
+    /** 喂养计时开始时间戳；null = 未在计时 */
+    val feedingTimerStart: Flow<Long?> = context.dataStore.data.map { it[keyFeedingTimerStart] }
+
+    suspend fun startFeedingTimer() {
+        context.dataStore.edit { it[keyFeedingTimerStart] = System.currentTimeMillis() }
+    }
+
+    suspend fun stopFeedingTimer() {
+        context.dataStore.edit { it.remove(keyFeedingTimerStart) }
+    }
 
     suspend fun setCurrentBaby(id: Long) {
         context.dataStore.edit { it[keyCurrentBaby] = id }

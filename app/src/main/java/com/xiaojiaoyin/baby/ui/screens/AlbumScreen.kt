@@ -1,6 +1,7 @@
-package com.xiaojiaoyin.baby.ui.screens
+﻿package com.xiaojiaoyin.baby.ui.screens
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,6 +35,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -62,10 +64,14 @@ import com.xiaojiaoyin.baby.ui.theme.MintLight
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
+import com.xiaojiaoyin.baby.ui.theme.PhotoPlaceholderBg
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @Composable
 fun AlbumScreen(onUpgrade: () -> Unit) {
@@ -279,7 +285,7 @@ private fun FilterChipRow(
 private fun Chip(label: String, active: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .background(if (active) Mint else Card, RoundedCornerShape(50))
+            .background(if (active) Mint else Card, RoundedCornerShape(50.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
@@ -299,16 +305,19 @@ private fun PhotoGridItem(
     onClick: () -> Unit
 ) {
     val path = record.detailJsonPath()
-    val bitmap = remember(record.id) {
-        if (path.isBlank()) null
-        else BitmapFactory.decodeFile(PhotoStorage.loadFile(context, path).absolutePath)
+    // IO 线程采样解码缩略图，避免主线程全尺寸解码卡顿/OOM
+    val bitmap by produceState<Bitmap?>(null, record.id, path) {
+        value = if (path.isBlank()) null
+        else withContext(Dispatchers.IO) {
+            PhotoStorage.decodeThumb(PhotoStorage.loadFile(context, path))
+        }
     }
     Box(
         modifier = Modifier
             .padding(3.dp)
             .aspectRatio(1f)
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFE3EEE8))
+            .background(PhotoPlaceholderBg)
             .clickable(onClick = onClick)
     ) {
         bitmap?.let {
@@ -347,9 +356,12 @@ private fun PhotoPreviewDialog(
     var tagList by remember(record.id) { mutableStateOf(record.tagsList()) }
     var newTag by remember(record.id) { mutableStateOf("") }
     val path = record.detailJsonPath()
-    val bitmap = remember(record.id) {
-        if (path.isBlank()) null
-        else BitmapFactory.decodeFile(PhotoStorage.loadFile(context, path).absolutePath)
+    // 预览图保留全尺寸，但移出组合阶段到 IO 线程解码
+    val bitmap by produceState<Bitmap?>(null, record.id, path) {
+        value = if (path.isBlank()) null
+        else withContext(Dispatchers.IO) {
+            BitmapFactory.decodeFile(PhotoStorage.loadFile(context, path).absolutePath)
+        }
     }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -377,7 +389,7 @@ private fun PhotoPreviewDialog(
                         tagList.forEach { tag ->
                             Box(
                                 modifier = Modifier
-                                    .background(MintLight, RoundedCornerShape(50))
+                                    .background(MintLight, RoundedCornerShape(50.dp))
                                     .padding(start = 10.dp, end = 4.dp, top = 3.dp, bottom = 3.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -460,7 +472,7 @@ private fun PhotoPreviewDialog(
                         context.startActivity(Intent.createChooser(share, "分享照片"))
                     }
                 }) { Text("分享", color = Mint) }
-                TextButton(onClick = onDelete) { Text("删除", color = Color(0xFFD96A6A)) }
+                TextButton(onClick = onDelete) { Text("删除", color = Red) }
             }
         }
     )

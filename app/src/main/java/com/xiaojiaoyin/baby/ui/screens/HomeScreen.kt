@@ -67,6 +67,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import org.json.JSONObject
+import com.xiaojiaoyin.baby.ui.theme.FreeTagBg
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -256,6 +257,7 @@ fun HomeScreen(
             val baby = state.currentBaby!!
             BabyCard(
                 avatarText = baby.name.take(1),
+                avatarPath = baby.avatarPath,
                 name = baby.name,
                 genderBadge = if (baby.gender == "男") "男宝" else "女宝",
                 subText = "小名 ${baby.nickname} · ${state.ageText}",
@@ -272,6 +274,38 @@ fun HomeScreen(
             )
         }
         item { BirthdayCards(derived = state.derived) }
+        state.nextAnniversary?.let { (name, countdown) ->
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 5.dp)
+                        .background(Card, RoundedCornerShape(18.dp))
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "纪念日",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Mint,
+                        modifier = Modifier
+                            .background(MintLight, RoundedCornerShape(6.dp))
+                            .padding(horizontal = 6.dp, vertical = 3.dp)
+                    )
+                    Text(
+                        name,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 10.dp)
+                    )
+                    Text(countdown, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Gold)
+                }
+            }
+        }
         item {
             QuickActions(
                 onFeeding = onFeeding,
@@ -322,13 +356,17 @@ private fun EmptyHome(onAdd: () -> Unit) {
             color = TextSecondary,
             modifier = Modifier.padding(top = 8.dp)
         )
-        Button(
-            onClick = onAdd,
-            modifier = Modifier.padding(top = 20.dp),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Text("添加宝宝", fontSize = 15.sp)
-        }
+        Text(
+            text = "添加宝宝",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier
+                .padding(top = 20.dp)
+                .background(Mint, RoundedCornerShape(14.dp))
+                .clickable(onClick = onAdd)
+                .padding(horizontal = 32.dp, vertical = 12.dp)
+        )
     }
 }
 
@@ -345,7 +383,7 @@ private fun InfoCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 10.dp)
-            .background(Card, RoundedCornerShape(20.dp))
+            .background(Card, RoundedCornerShape(18.dp))
             .padding(16.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -369,7 +407,7 @@ private fun InfoCard(
                         when {
                             isPro -> GoldLight
                             unlocked -> MintLight
-                            else -> androidx.compose.ui.graphics.Color(0xFFF0F0EC)
+                            else -> FreeTagBg
                         },
                         RoundedCornerShape(9.dp)
                     )
@@ -598,7 +636,7 @@ private fun FeedCard(record: com.xiaojiaoyin.baby.data.db.entity.RecordEntity) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 5.dp)
             .background(Card, RoundedCornerShape(18.dp))
-            .padding(13.dp),
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         TypeTag(ui.kind, ui.tagText)

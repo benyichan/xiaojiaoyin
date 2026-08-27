@@ -4,6 +4,7 @@ import com.xiaojiaoyin.baby.data.db.entity.RecordEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordType
 import com.xiaojiaoyin.baby.data.db.entity.TodoEntity
 import java.time.Instant
+import java.time.YearMonth
 import java.time.ZoneId
 
 data class MonthlyOverview(
@@ -17,9 +18,10 @@ data class MonthlyOverview(
 object StatsCalculator {
 
     fun monthlyOverview(records: List<RecordEntity>, now: Long, zone: ZoneId = ZoneId.of("Asia/Shanghai")): MonthlyOverview {
-        val month = Instant.ofEpochMilli(now).atZone(zone).monthValue
+        // 按年+月过滤，避免把去年同月的记录混进"本月"统计
+        val ym = YearMonth.from(Instant.ofEpochMilli(now).atZone(zone))
         val thisMonth = records.filter {
-            Instant.ofEpochMilli(it.occurredAt).atZone(zone).monthValue == month
+            YearMonth.from(Instant.ofEpochMilli(it.occurredAt).atZone(zone)) == ym
         }
         return MonthlyOverview(
             total = thisMonth.size,

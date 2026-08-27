@@ -11,6 +11,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,8 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.xiaojiaoyin.baby.ui.screens.AlbumScreen
 import com.xiaojiaoyin.baby.ui.screens.AnnivScreen
+import com.xiaojiaoyin.baby.ui.screens.AnniversaryScreen
+import com.xiaojiaoyin.baby.ui.screens.AnniversaryFormScreen
 import com.xiaojiaoyin.baby.ui.screens.AboutScreen
 import com.xiaojiaoyin.baby.ui.screens.BabyManageScreen
 import com.xiaojiaoyin.baby.ui.screens.BabyDetailScreen
@@ -59,6 +62,7 @@ import com.xiaojiaoyin.baby.ui.screens.SchoolScreen
 import com.xiaojiaoyin.baby.ui.screens.StatsScreen
 import com.xiaojiaoyin.baby.ui.screens.SyncScreen
 import com.xiaojiaoyin.baby.ui.screens.TodoScreen
+import com.xiaojiaoyin.baby.ui.screens.VaccineScreen
 import com.xiaojiaoyin.baby.ui.theme.Bg
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
@@ -94,6 +98,9 @@ sealed interface Route {
     data object Privacy : Route
     data object ReminderSettings : Route
     data class BabyDetail(val babyId: Long) : Route
+    data object Anniversary : Route
+    data class AnniversaryForm(val editId: Long? = null) : Route
+    data object Vaccine : Route
 }
 
 private val TABS = listOf(
@@ -175,6 +182,8 @@ fun AppNav() {
                             onOpenSchool = { backStack.add(Route.School) },
                             onOpenGoods = { backStack.add(Route.Goods) },
                             onOpenAnniv = { backStack.add(Route.Anniv) },
+                            onOpenAnniversary = { backStack.add(Route.Anniversary) },
+                            onOpenVaccine = { backStack.add(Route.Vaccine) },
                             onOpenSync = { backStack.add(Route.Sync) },
                             onOpenPurchase = { backStack.add(Route.Purchase) },
                             onOpenBabyManage = { backStack.add(Route.BabyManage) },
@@ -268,6 +277,19 @@ fun AppNav() {
                     is Route.BabyDetail -> NavEntry(key) {
                         BabyDetailScreen(babyId = key.babyId, onBack = { backStack.removeLastOrNull() })
                     }
+                    Route.Anniversary -> NavEntry(key) {
+                        AnniversaryScreen(
+                            onBack = { backStack.removeLastOrNull() },
+                            onAdd = { backStack.add(Route.AnniversaryForm(null)) },
+                            onEdit = { id -> backStack.add(Route.AnniversaryForm(id)) }
+                        )
+                    }
+                    is Route.AnniversaryForm -> NavEntry(key) {
+                        AnniversaryFormScreen(editId = key.editId, onBack = { backStack.removeLastOrNull() })
+                    }
+                    Route.Vaccine -> NavEntry(key) {
+                        VaccineScreen(onBack = { backStack.removeLastOrNull() })
+                    }
                     else -> NavEntry(key) { Text("未实现页面") }
                 }
             }
@@ -305,7 +327,10 @@ private fun BottomTabBar(current: Route?, onSelect: (Route) -> Unit, modifier: M
                 color = if (active) Mint else TextSecondary,
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { onSelect(route) }
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { onSelect(route) }
                     .padding(vertical = 4.dp),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )

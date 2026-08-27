@@ -14,9 +14,11 @@ class BootReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val pending = AppGraph.todoRepository.pendingReminders(System.currentTimeMillis())
+                val pending = AppGraph.todoRepository.pendingReminders()
                 val scheduler = ReminderScheduler(context)
                 pending.forEach { scheduler.schedule(it) }
+                runCatching { BirthdayScheduler(context).scheduleAll() }
+                runCatching { VaccineScheduler(context).scheduleAll() }
             } finally {
                 pendingResult.finish()
             }

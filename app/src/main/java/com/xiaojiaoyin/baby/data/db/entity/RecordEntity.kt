@@ -2,6 +2,7 @@ package com.xiaojiaoyin.baby.data.db.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.UUID
 
 enum class RecordType {
     FEEDING, CRYING, GROWTH, PHOTO, NODE, MEDICAL
@@ -10,6 +11,8 @@ enum class RecordType {
 @Entity(tableName = "record")
 data class RecordEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    /** 同步唯一标识（跨设备稳定，合并键） */
+    val uuid: String = UUID.randomUUID().toString(),
     val babyId: Long,
     val type: RecordType,
     val occurredAt: Long,

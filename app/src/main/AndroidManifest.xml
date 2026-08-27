@@ -30,6 +30,34 @@
             android:exported="false" />
 
         <receiver
+            android:name=".reminder.VaccineReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".widget.BabyPhotoWidgetReceiver"
+            android:exported="false"
+            android:label="小脚印·照片">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/baby_photo_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.BabyInfoWidgetReceiver"
+            android:exported="false"
+            android:label="小脚印·信息">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/baby_info_widget_info" />
+        </receiver>
+
+        <receiver
             android:name=".reminder.BootReceiver"
             android:exported="false">
             <intent-filter>

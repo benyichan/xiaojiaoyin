@@ -254,7 +254,7 @@ private fun StatCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
-            .background(Card, RoundedCornerShape(20.dp))
+            .background(Card, RoundedCornerShape(18.dp))
             .clickable(enabled = onClick != null) { onClick?.invoke() }
             .padding(16.dp)
     ) {

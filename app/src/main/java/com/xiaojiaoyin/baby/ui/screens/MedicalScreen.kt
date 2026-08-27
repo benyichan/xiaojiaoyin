@@ -51,6 +51,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 private val MEDICAL_CATEGORIES = listOf("疫苗", "体检", "就诊", "用药")
 
@@ -166,7 +167,7 @@ fun MedicalScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) 
                 TextButton(onClick = {
                     scope.launch { AppGraph.recordRepository.delete(preview) }
                     previewId = null
-                }) { Text("删除", color = Color(0xFFD96A6A)) }
+                }) { Text("删除", color = Red) }
             }
         )
     }

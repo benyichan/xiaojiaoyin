@@ -5,6 +5,8 @@ import com.xiaojiaoyin.baby.data.db.entity.RecordType
 import com.xiaojiaoyin.baby.data.db.entity.TodoEntity
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 class StatsCalculatorTest {
 
@@ -54,6 +56,21 @@ class StatsCalculatorTest {
         val buckets = StatsCalculator.cryingTimeBuckets(records)
         assertEquals(2, buckets.sum())
         assertEquals(8, buckets.size)
+    }
+
+    @Test
+    fun `月度概览不混入去年同月`() {
+        val zone = ZoneId.of("Asia/Shanghai")
+        val now = LocalDateTime.parse("2026-08-15T12:00").atZone(zone).toInstant().toEpochMilli()
+        val lastYear = LocalDateTime.parse("2025-08-20T12:00").atZone(zone).toInstant().toEpochMilli()
+        val records = listOf(
+            record(RecordType.FEEDING, now),
+            record(RecordType.CRYING, lastYear)
+        )
+        val overview = StatsCalculator.monthlyOverview(records, now)
+        assertEquals(1, overview.total)
+        assertEquals(1, overview.feeding)
+        assertEquals(0, overview.crying)
     }
 
     @Test

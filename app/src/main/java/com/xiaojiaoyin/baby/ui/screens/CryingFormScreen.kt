@@ -33,6 +33,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import org.json.JSONObject
 import kotlinx.coroutines.launch
+import com.xiaojiaoyin.baby.ui.theme.Red
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +80,7 @@ fun CryingFormScreen(onBack: () -> Unit) {
             placeholder = "选填"
         )
         error?.let {
-            Text(it, fontSize = 12.sp, color = Color(0xFFD96A6A), modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+            Text(it, fontSize = 12.sp, color = Red, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
         }
         SaveButton("保存") {
             if (comfort.isBlank()) {
