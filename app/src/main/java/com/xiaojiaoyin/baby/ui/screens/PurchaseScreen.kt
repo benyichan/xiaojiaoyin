@@ -41,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.R
+import com.xiaojiaoyin.baby.domain.BundledCodes
 import com.xiaojiaoyin.baby.domain.License
 import com.xiaojiaoyin.baby.domain.LicenseManager
 import com.xiaojiaoyin.baby.ui.components.OverlayHeader
@@ -54,6 +55,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 private const val DEV_EMAIL = "benyi@aliyun.com"
 
@@ -66,7 +69,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
     val expireAt by AppGraph.proStatusRepository.proExpireAt.collectAsStateWithLifecycle(initialValue = 0L)
     var codeInput by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
-    var copied by remember { mutableStateOf(false) }
+    var copiedId by remember { mutableStateOf<String?>(null) }
     var selectedPlan by remember { mutableStateOf("L") }
     var now by remember { mutableStateOf(System.currentTimeMillis()) }
     // 限时促销：固定截止时间（重装不重置，到期自动结束）
@@ -88,7 +91,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .imePadding().navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("订阅升级", onBack)
 
@@ -205,14 +208,14 @@ fun PurchaseScreen(onBack: () -> Unit) {
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = if (copied) "已复制" else "复制",
+                    text = if (copiedId == "deviceId") "已复制" else "复制",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     color = Mint,
                     modifier = Modifier.clickable {
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         cm.setPrimaryClip(ClipData.newPlainText("deviceId", deviceId))
-                        copied = true
+                        copiedId = "deviceId"
                     }
                 )
             }
@@ -239,7 +242,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
                         .clickable {
                             val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             cm.setPrimaryClip(ClipData.newPlainText("devEmail", DEV_EMAIL))
-                            copied = true
+                            copiedId = "devEmail"
                         }
                 )
             }
@@ -261,7 +264,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
                         val content = "小脚印 Pro 激活申请\n设备 ID：$deviceId\n套餐：$planText\n支付凭证：____（请附上付款截图，如微信支付详情页）\n回执邮箱：____（填你的邮箱）\n已付款，请回复激活码，谢谢！"
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         cm.setPrimaryClip(ClipData.newPlainText("licenseApply", content))
-                        copied = true
+                        copiedId = "apply"
                     }
                     .padding(vertical = 12.dp),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -314,6 +317,29 @@ fun PurchaseScreen(onBack: () -> Unit) {
                         }
                     }
                     .padding(vertical = 13.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Text(
+                text = "使用内置永久码一键激活（免付款、免输入）",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Mint,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .clickable {
+                        scope.launch {
+                            message = runCatching {
+                                val info = License.verifyCode(
+                                    BundledCodes.PERMANENT.first(),
+                                    LicenseManager.deviceIdBytes(context)
+                                ) ?: error("内置码校验失败，请升级到最新版本")
+                                AppGraph.proStatusRepository.setProWithExpire(true, info.expireAt)
+                                "激活成功：永久 Pro"
+                            }.getOrElse { "激活失败：${it.message}" }
+                        }
+                    }
+                    .padding(vertical = 8.dp),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
