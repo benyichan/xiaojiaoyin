@@ -33,16 +33,16 @@ fun rememberProUnlocked(): State<Boolean> {
     return flow.collectAsStateWithLifecycle(initialValue = false)
 }
 
-/** 试用剩余天数（0 表示试用已结束或未开始） */
+/** 试用剩余天数（0 表示试用已结束或未开始）；向上取整，首日显示 7 而非 6 */
 @Composable
 fun rememberTrialRemainingDays(): State<Long> {
     val trialStart by AppGraph.proStatusRepository.trialStartAt
         .collectAsStateWithLifecycle(initialValue = 0L)
     return remember(trialStart) {
+        val remainingMs = if (trialStart == 0L) 0L
+        else trialStart + ProStatusRepository.TRIAL_DAYS * ProStatusRepository.DAY_MS - System.currentTimeMillis()
         mutableLongStateOf(
-            if (trialStart == 0L) 0L
-            else ((trialStart + ProStatusRepository.TRIAL_DAYS * ProStatusRepository.DAY_MS - System.currentTimeMillis())
-                / ProStatusRepository.DAY_MS).coerceAtLeast(0)
+            if (remainingMs <= 0) 0L else (remainingMs + ProStatusRepository.DAY_MS - 1) / ProStatusRepository.DAY_MS
         )
     }
 }

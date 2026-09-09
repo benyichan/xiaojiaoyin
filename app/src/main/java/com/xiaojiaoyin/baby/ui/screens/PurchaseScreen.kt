@@ -119,7 +119,7 @@ fun PurchaseScreen(onBack: () -> Unit) {
             color = TextPrimary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         )
-        listOf("多宝宝档案", "完整生长曲线 + 数据看板", "无限照片空间", "多设备离线共享", "高级提醒（重复提醒）").forEach {
+        listOf("多宝宝档案", "WHO 生长曲线", "无限照片空间", "多设备离线共享", "高级提醒（重复提醒）").forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -181,6 +181,12 @@ fun PurchaseScreen(onBack: () -> Unit) {
             fontWeight = FontWeight.ExtraBold,
             color = TextPrimary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+        )
+        Text(
+            "新用户免付款试用 7 天：首次安装后 Pro 全功能自动开放；到期后统计看板等基础功能仍然免费。",
+            fontSize = 12.sp,
+            color = TextSecondary,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
         )
         StepRow("1", "扫码付款：¥6.8（月）/ ¥59（年）/ ¥159（永久）")
         StepRow("2", "发邮件到 benyi@aliyun.com，附上设备 ID、支付凭证截图和你常用的邮箱")

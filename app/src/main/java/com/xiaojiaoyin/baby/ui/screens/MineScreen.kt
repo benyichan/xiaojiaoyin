@@ -56,8 +56,9 @@ fun MineScreen(
     val expireAt by AppGraph.proStatusRepository.proExpireAt.collectAsStateWithLifecycle(initialValue = 0L)
     val trialStartAt by AppGraph.proStatusRepository.trialStartAt.collectAsStateWithLifecycle(initialValue = 0L)
     val trialRemaining = if (trialStartAt > 0) {
-        ((trialStartAt + ProStatusRepository.TRIAL_DAYS * ProStatusRepository.DAY_MS - System.currentTimeMillis())
-            / ProStatusRepository.DAY_MS).coerceAtLeast(0)
+        // 向上取整：试用期内首日显示「剩余 7 天」
+        val remainingMs = trialStartAt + ProStatusRepository.TRIAL_DAYS * ProStatusRepository.DAY_MS - System.currentTimeMillis()
+        if (remainingMs <= 0) 0L else (remainingMs + ProStatusRepository.DAY_MS - 1) / ProStatusRepository.DAY_MS
     } else 0L
 
     Column(

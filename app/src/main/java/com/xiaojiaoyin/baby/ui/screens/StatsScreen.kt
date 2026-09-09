@@ -44,8 +44,6 @@ import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.Pink
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
-import com.xiaojiaoyin.baby.ui.components.ProLockedView
-import com.xiaojiaoyin.baby.ui.common.rememberProUnlocked
 import kotlinx.coroutines.flow.flowOf
 import org.json.JSONObject
 import java.time.Instant
@@ -55,15 +53,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun StatsScreen(onOpenChart: () -> Unit, onUpgrade: () -> Unit) {
-    val unlocked by rememberProUnlocked()
-    if (!unlocked) {
-        ProLockedView(
-            title = "数据看板",
-            desc = "生长曲线、喂养统计、哭闹分布是 Pro 专属功能",
-            onUpgrade = onUpgrade
-        )
-        return
-    }
+    // 统计看板为基础功能，免费开放；WHO 生长曲线（onOpenChart 详情页）仍为 Pro
     val babyId by com.xiaojiaoyin.baby.ui.common.rememberCurrentBabyId()
     val records by remember(babyId) {
         if (babyId == null) flowOf(emptyList<RecordEntity>())
