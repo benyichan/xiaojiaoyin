@@ -51,6 +51,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 private val FIELD_TEMPLATES = listOf("身份证号", "血型", "过敏史", "民族", "疫苗接种机构", "出生医院", "身高出生值", "体重出生值")
 
@@ -168,7 +169,7 @@ fun BabyDetailScreen(babyId: Long, onBack: () -> Unit) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
+                    .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
             ) {
                 items(fields, key = { it.id }) { field ->
                     Row(

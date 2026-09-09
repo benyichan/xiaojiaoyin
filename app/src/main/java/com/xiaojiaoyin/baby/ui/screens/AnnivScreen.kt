@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.flowOf
 import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun AnnivScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
@@ -94,7 +95,7 @@ fun AnnivScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
+                    .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
             ) {
                 items(pastOnThisDay.size) { index ->
                     val r = pastOnThisDay[index]

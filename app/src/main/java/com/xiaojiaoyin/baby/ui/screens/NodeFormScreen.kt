@@ -67,6 +67,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.xiaojiaoyin.baby.ui.theme.PhotoPlaceholderBg
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,7 +125,7 @@ fun NodeFormScreen(nodeId: Long?, onBack: () -> Unit, onUpgrade: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .imePadding().navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader(if (nodeId == null) "记录成长节点" else "编辑节点", onBack)
         TextInputField(

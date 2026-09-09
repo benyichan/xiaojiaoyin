@@ -46,6 +46,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -66,7 +67,7 @@ fun AnniversaryScreen(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
-            .padding(bottom = 30.dp)
+            .navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("纪念日", onBack)
         Box(

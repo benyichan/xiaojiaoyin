@@ -40,6 +40,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +63,7 @@ fun GoodsFormScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .imePadding().navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("添加好物", onBack)
         TextInputField(

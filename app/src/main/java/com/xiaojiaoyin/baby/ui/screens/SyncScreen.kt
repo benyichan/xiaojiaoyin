@@ -50,6 +50,7 @@ import java.net.Inet4Address
 import java.net.NetworkInterface
 import kotlinx.coroutines.launch
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
@@ -125,7 +126,7 @@ fun SyncScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("共享同步", onBack)
         Text(

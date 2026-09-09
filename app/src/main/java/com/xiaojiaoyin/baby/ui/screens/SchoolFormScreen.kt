@@ -31,6 +31,8 @@ import com.xiaojiaoyin.baby.ui.components.TextInputField
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import kotlinx.coroutines.launch
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun SchoolFormScreen(onBack: () -> Unit) {
@@ -52,7 +54,7 @@ fun SchoolFormScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .imePadding().navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("添加学籍阶段", onBack)
         SegmentedField(

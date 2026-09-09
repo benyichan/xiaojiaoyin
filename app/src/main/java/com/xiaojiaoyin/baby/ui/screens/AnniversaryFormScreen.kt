@@ -40,6 +40,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +72,7 @@ fun AnniversaryFormScreen(editId: Long?, onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .imePadding().navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader(if (editId == null) "新建纪念日" else "编辑纪念日", onBack)
         TextInputField(

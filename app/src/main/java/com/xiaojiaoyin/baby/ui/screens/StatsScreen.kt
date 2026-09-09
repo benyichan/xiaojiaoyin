@@ -51,6 +51,7 @@ import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun StatsScreen(onOpenChart: () -> Unit, onUpgrade: () -> Unit) {
@@ -85,7 +86,7 @@ fun StatsScreen(onOpenChart: () -> Unit, onUpgrade: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 70.dp)
+            .navigationBarsPadding().padding(bottom = 70.dp)
     ) {
         Text(
             text = "统计",

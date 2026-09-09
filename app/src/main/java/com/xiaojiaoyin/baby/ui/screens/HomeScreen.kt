@@ -68,6 +68,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import org.json.JSONObject
 import com.xiaojiaoyin.baby.ui.theme.FreeTagBg
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,6 +132,7 @@ fun HomeScreen(
 
     if (showBabyPicker && state.babies.isNotEmpty()) {
         ModalBottomSheet(onDismissRequest = { showBabyPicker = false }) {
+            Column(modifier = Modifier.navigationBarsPadding()) {
             state.babies.forEach { baby ->
                 Row(
                     modifier = Modifier
@@ -204,6 +206,7 @@ fun HomeScreen(
                     )
                 }
             }
+            }
         }
     }
 
@@ -250,7 +253,7 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
-            .padding(bottom = 70.dp)
+            .navigationBarsPadding().padding(bottom = 70.dp)
     ) {
         item { Spacer(Modifier.height(12.dp)) }
         item {

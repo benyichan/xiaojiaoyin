@@ -72,6 +72,7 @@ import java.time.Instant
 import java.time.ZoneId
 import com.xiaojiaoyin.baby.ui.theme.PhotoPlaceholderBg
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun AlbumScreen(onUpgrade: () -> Unit) {
@@ -196,7 +197,7 @@ fun AlbumScreen(onUpgrade: () -> Unit) {
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 70.dp)
+                    .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 70.dp)
             ) {
                 if (showHeaders) {
                     grouped.forEach { (month, list) ->

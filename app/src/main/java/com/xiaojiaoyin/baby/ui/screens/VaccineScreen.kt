@@ -49,6 +49,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 private data class VaccineRow(val dose: VaccineDose, val vaccinated: VaccinationEntity?, val status: VaccineStatus)
 
@@ -83,7 +84,7 @@ fun VaccineScreen(onBack: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
-            .padding(bottom = 30.dp)
+            .navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("疫苗接种", onBack)
         val doneCount = rows.count { it.status == VaccineStatus.DONE }

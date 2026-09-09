@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -58,6 +60,8 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
 import com.xiaojiaoyin.baby.ui.theme.Red
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,7 +106,8 @@ fun TodoScreen(onBack: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
-            .padding(bottom = 30.dp)
+            .imePadding().navigationBarsPadding().padding(bottom = 30.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         OverlayHeader("待办清单", onBack)
         Box(
@@ -226,7 +231,7 @@ fun TodoScreen(onBack: () -> Unit) {
             text = {
                 Text(
                     "系统默认关闭了精确闹钟权限，到点提醒可能不触发。\n\n" +
-                        ReminderPermissionHelper.vendorHint(context)?.let { "$it\n\n" } ?: "" +
+                        (ReminderPermissionHelper.vendorHint(context)?.let { "$it\n\n" } ?: "") +
                         "请在系统设置中允许「闹钟和提醒」权限。"
                 )
             },
@@ -286,7 +291,7 @@ private fun AddTodoForm(
             .background(com.xiaojiaoyin.baby.ui.theme.Bg)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .imePadding().navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader(if (todo == null) "新建待办" else "编辑待办", onBack)
         TextInputField(

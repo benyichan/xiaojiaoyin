@@ -45,6 +45,7 @@ import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun FeedingZoneScreen(onBack: () -> Unit, onAdd: () -> Unit) {
@@ -134,7 +135,7 @@ private fun RecordZoneScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
+                    .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
             ) {
                 items(records.size) { index ->
                     val r = records[index]

@@ -31,6 +31,7 @@ import com.xiaojiaoyin.baby.data.settings.ProStatusRepository
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun MineScreen(
@@ -64,7 +65,7 @@ fun MineScreen(
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 70.dp)
+            .navigationBarsPadding().padding(bottom = 70.dp)
     ) {
         Text(
             text = "我的",

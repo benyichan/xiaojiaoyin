@@ -48,6 +48,8 @@ import java.time.format.DateTimeFormatter
 import org.json.JSONObject
 import kotlinx.coroutines.launch
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +78,7 @@ fun FeedingFormScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .imePadding().navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("记录喂养", onBack)
         // 喂养计时器：开始 → 实时时长 → 停止并自动填入时长（开始时刻作为记录时间）

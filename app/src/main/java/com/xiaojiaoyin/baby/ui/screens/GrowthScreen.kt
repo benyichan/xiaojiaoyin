@@ -62,6 +62,7 @@ import java.time.Instant
 import java.time.ZoneId
 import com.xiaojiaoyin.baby.ui.theme.PhotoPlaceholderBg
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun GrowthScreen(onAddNode: () -> Unit, onEditNode: (Long) -> Unit) {
@@ -139,7 +140,7 @@ fun GrowthScreen(onAddNode: () -> Unit, onEditNode: (Long) -> Unit) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 70.dp)
+                    .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 70.dp)
             ) {
                 grouped.forEach { (month, list) ->
                     item(key = "h-$month") {

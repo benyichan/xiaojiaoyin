@@ -1,6 +1,8 @@
 package com.xiaojiaoyin.baby.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +54,7 @@ import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 private val MEDICAL_CATEGORIES = listOf("疫苗", "体检", "就诊", "用药")
 
@@ -118,7 +121,7 @@ fun MedicalScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 30.dp)
+                    .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 30.dp)
             ) {
                 items(filtered.size) { index ->
                     val r = filtered[index]
@@ -180,7 +183,7 @@ private fun FilterChips(
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier = modifier) {
+    Row(modifier = modifier.horizontalScroll(rememberScrollState())) {
         options.forEach { option ->
             val active = option == selected
             Text(

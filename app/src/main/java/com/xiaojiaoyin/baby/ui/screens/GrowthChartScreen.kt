@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.flowOf
 import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun GrowthChartScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
@@ -109,7 +110,7 @@ fun GrowthChartScreen(onBack: () -> Unit, onUpgrade: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("生长曲线", onBack)
         SegmentedField(

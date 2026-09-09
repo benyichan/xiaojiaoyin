@@ -60,6 +60,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import com.xiaojiaoyin.baby.data.settings.ProStatusRepository
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,7 +110,7 @@ fun BabyEditScreen(babyId: Long?, onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .imePadding().navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader(if (babyId == null) "添加宝宝" else "编辑档案", onBack)
 

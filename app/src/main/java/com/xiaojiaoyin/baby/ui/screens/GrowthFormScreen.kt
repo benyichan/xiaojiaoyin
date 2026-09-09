@@ -41,6 +41,8 @@ import java.time.format.DateTimeFormatter
 import org.json.JSONObject
 import kotlinx.coroutines.launch
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +65,7 @@ fun GrowthFormScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .imePadding().navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("记录生长", onBack)
         TextInputField(

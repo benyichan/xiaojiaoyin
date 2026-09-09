@@ -47,6 +47,7 @@ import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun BabyManageScreen(
@@ -94,7 +95,7 @@ fun BabyManageScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
+                .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
         ) {
             items(babies.size) { index ->
                 val baby = babies[index]

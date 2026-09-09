@@ -38,6 +38,7 @@ import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun BackupScreen(onBack: () -> Unit) {
@@ -75,7 +76,7 @@ fun BackupScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("备份与恢复", onBack)
         BackupAction("导出备份", "生成包含全部宝宝与记录的文件，可保存到手机或电脑") {

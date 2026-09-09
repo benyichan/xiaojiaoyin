@@ -47,6 +47,7 @@ import com.xiaojiaoyin.baby.ui.theme.TextSecondary
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun SchoolScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) {
@@ -96,7 +97,7 @@ fun SchoolScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
+                    .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
             ) {
                 items(stages.size) { index ->
                     val s = stages[index]

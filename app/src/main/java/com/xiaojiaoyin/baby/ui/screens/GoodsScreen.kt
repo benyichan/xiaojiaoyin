@@ -45,6 +45,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.xiaojiaoyin.baby.ui.theme.Red
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) {
@@ -94,7 +95,7 @@ fun GoodsScreen(onBack: () -> Unit, onAdd: () -> Unit, onUpgrade: () -> Unit) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
+                    .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
             ) {
                 items(items.size) { index ->
                     val item = items[index]

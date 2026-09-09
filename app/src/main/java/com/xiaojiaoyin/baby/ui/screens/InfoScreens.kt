@@ -25,6 +25,7 @@ import com.xiaojiaoyin.baby.ui.theme.Card
 import com.xiaojiaoyin.baby.ui.theme.Mint
 import com.xiaojiaoyin.baby.ui.theme.TextPrimary
 import com.xiaojiaoyin.baby.ui.theme.TextSecondary
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun AboutScreen(onBack: () -> Unit) {
@@ -33,7 +34,7 @@ fun AboutScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("关于", onBack)
         InfoBlock("小脚印", "宝宝成长记录 · 完全离线")
@@ -50,7 +51,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("隐私政策", onBack)
         InfoBlock("数据处理", "小脚印完全离线运行：宝宝档案、照片、记录、待办等全部数据仅存储在你自己的设备上，不上传、不传输到任何服务器。")
@@ -68,7 +69,7 @@ fun ReminderSettingsScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 30.dp)
+            .navigationBarsPadding().padding(bottom = 30.dp)
     ) {
         OverlayHeader("提醒设置", onBack)
         Text(
