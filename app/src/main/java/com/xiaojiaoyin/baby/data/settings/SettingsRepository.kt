@@ -31,6 +31,7 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setCurrentBaby(id: Long) {
         context.dataStore.edit { it[keyCurrentBaby] = id }
+        com.xiaojiaoyin.baby.widget.WidgetSync.refresh(context)
     }
 
     suspend fun getCurrentBabyId(): Long? = currentBabyId.first()

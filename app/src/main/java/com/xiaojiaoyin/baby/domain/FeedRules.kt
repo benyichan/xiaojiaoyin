@@ -16,9 +16,11 @@ object FeedRules {
     )
 
     fun ageMonths(birthDateTimeMillis: Long, now: Long = System.currentTimeMillis()): Int {
+        // 按真实日历月龄（到出生日的 day-of-month 才算满 N 月）；
+        // 旧实现对月初截断，1 月 15 日出生的宝宝 2 月 1 日就显示「1个月」，满月最多提前近一个月
         val birth = Instant.ofEpochMilli(birthDateTimeMillis).atZone(ZoneId.of("Asia/Shanghai")).toLocalDate()
         val today = Instant.ofEpochMilli(now).atZone(ZoneId.of("Asia/Shanghai")).toLocalDate()
-        return ChronoUnit.MONTHS.between(birth.withDayOfMonth(1), today.withDayOfMonth(1)).toInt()
+        return ChronoUnit.MONTHS.between(birth, today).coerceAtLeast(0).toInt()
     }
 
     fun isActive(type: RecordType, ageMonths: Int): Boolean =

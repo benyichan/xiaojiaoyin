@@ -6,6 +6,7 @@ import com.xiaojiaoyin.baby.data.db.dao.BabyDao
 import com.xiaojiaoyin.baby.data.db.entity.BabyEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordType
 import com.xiaojiaoyin.baby.data.db.entity.SyncTombstoneEntity
+import com.xiaojiaoyin.baby.widget.WidgetSync
 import kotlinx.coroutines.flow.Flow
 import org.json.JSONObject
 
@@ -16,10 +17,17 @@ class BabyRepository(private val dao: BabyDao) {
 
     suspend fun getById(id: Long): BabyEntity? = dao.getById(id)
 
-    suspend fun add(baby: BabyEntity): Long = dao.insert(baby)
+    suspend fun add(baby: BabyEntity): Long {
+        val id = dao.insert(baby)
+        WidgetSync.refresh(AppGraph.appContext)
+        return id
+    }
 
     /** 更新时刷新 updatedAt，供同步合并使用 */
-    suspend fun update(baby: BabyEntity) = dao.update(baby.copy(updatedAt = System.currentTimeMillis()))
+    suspend fun update(baby: BabyEntity) {
+        dao.update(baby.copy(updatedAt = System.currentTimeMillis()))
+        WidgetSync.refresh(AppGraph.appContext)
+    }
 
     suspend fun delete(baby: BabyEntity) {
         AppGraph.database.syncTombstoneDao()
@@ -66,6 +74,7 @@ class BabyRepository(private val dao: BabyDao) {
             db.anniversaryDao().deleteByBabyId(baby.id)
             db.vaccinationDao().deleteByBabyId(baby.id)
             dao.delete(baby)
+            WidgetSync.refresh(AppGraph.appContext)
             photoPaths
         }
     }

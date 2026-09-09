@@ -4,6 +4,7 @@ import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.data.db.dao.TodoDao
 import com.xiaojiaoyin.baby.data.db.entity.SyncTombstoneEntity
 import com.xiaojiaoyin.baby.data.db.entity.TodoEntity
+import com.xiaojiaoyin.baby.widget.WidgetSync
 import kotlinx.coroutines.flow.Flow
 
 class TodoRepository(private val dao: TodoDao) {
@@ -16,8 +17,8 @@ class TodoRepository(private val dao: TodoDao) {
     suspend fun markReminded(todo: TodoEntity) =
         dao.update(todo.copy(remindedAt = System.currentTimeMillis()))
 
-    suspend fun add(babyId: Long, title: String, timeAt: Long, remindEnabled: Boolean): Long =
-        dao.insert(
+    suspend fun add(babyId: Long, title: String, timeAt: Long, remindEnabled: Boolean): Long {
+        val id = dao.insert(
             TodoEntity(
                 babyId = babyId,
                 title = title,
@@ -27,13 +28,19 @@ class TodoRepository(private val dao: TodoDao) {
                 updatedAt = System.currentTimeMillis()
             )
         )
+        WidgetSync.refresh(AppGraph.appContext)
+        return id
+    }
 
-    suspend fun update(todo: TodoEntity) =
+    suspend fun update(todo: TodoEntity) {
         dao.update(todo.copy(updatedAt = System.currentTimeMillis()))
+        WidgetSync.refresh(AppGraph.appContext)
+    }
 
     suspend fun delete(todo: TodoEntity) {
         AppGraph.database.syncTombstoneDao()
             .upsert(SyncTombstoneEntity("todo", todo.uuid, System.currentTimeMillis()))
         dao.delete(todo)
+        WidgetSync.refresh(AppGraph.appContext)
     }
 }

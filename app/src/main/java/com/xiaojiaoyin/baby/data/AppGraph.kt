@@ -16,6 +16,8 @@ import com.xiaojiaoyin.baby.data.settings.ProStatusRepository
 object AppGraph {
     /** 小组件等非 Activity 入口的冷启动判断 */
     val isInitialized: Boolean get() = ::database.isInitialized
+    lateinit var appContext: Context
+        private set
     lateinit var database: AppDatabase
         private set
     lateinit var babyRepository: BabyRepository
@@ -41,6 +43,7 @@ object AppGraph {
 
     fun init(context: Context) {
         if (::database.isInitialized) return
+        appContext = context.applicationContext
         database = AppDatabase.get(context)
         babyRepository = BabyRepository(database.babyDao())
         recordRepository = RecordRepository(database.recordDao())

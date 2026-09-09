@@ -70,6 +70,10 @@ class SyncManager {
                         db.schoolStageDao().deleteByBabyId(baby.id)
                         db.goodItemDao().deleteByBabyId(baby.id)
                         db.babyCustomFieldDao().deleteByBabyId(baby.id)
+                        // 与 BabyRepository.deleteCascade 同口径：纪念日与疫苗也要清，
+                        // 否则对端同步来的宝宝删除会留下孤儿行（本库无外键级联）
+                        db.anniversaryDao().deleteByBabyId(baby.id)
+                        db.vaccinationDao().deleteByBabyId(baby.id)
                         db.babyDao().delete(baby)
                     }
                     "record" -> db.recordDao().getByUuid(t.uuid)?.let { db.recordDao().delete(it) }

@@ -6,6 +6,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import com.xiaojiaoyin.baby.data.AppGraph
 import com.xiaojiaoyin.baby.reminder.BirthdayScheduler
+import com.xiaojiaoyin.baby.widget.WidgetSync
 import com.xiaojiaoyin.baby.reminder.ReminderScheduler
 import com.xiaojiaoyin.baby.reminder.VaccineScheduler
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +23,8 @@ class BabyApp : Application() {
         installCrashLogger()
         CoroutineScope(Dispatchers.IO).launch {
             AppGraph.proStatusRepository.ensureTrialStarted()
+            // 启动时兜底刷新小组件（覆盖恢复备份重启、开机等场景）
+            runCatching { WidgetSync.refresh(this@BabyApp) }
             runCatching {
                 BirthdayScheduler(this@BabyApp).scheduleAll()
             }.onFailure {

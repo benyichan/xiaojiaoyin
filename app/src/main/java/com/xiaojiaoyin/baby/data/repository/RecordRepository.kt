@@ -1,11 +1,13 @@
 package com.xiaojiaoyin.baby.data.repository
 
 import com.xiaojiaoyin.baby.data.AppGraph
+import com.xiaojiaoyin.baby.data.PhotoStorage
 import com.xiaojiaoyin.baby.data.db.dao.RecordDao
 import com.xiaojiaoyin.baby.data.db.entity.RecordEntity
 import com.xiaojiaoyin.baby.data.db.entity.RecordType
 import com.xiaojiaoyin.baby.data.db.entity.SyncTombstoneEntity
 import kotlinx.coroutines.flow.Flow
+import org.json.JSONObject
 
 class RecordRepository(private val dao: RecordDao) {
     fun observeRecent(babyId: Long, limit: Int = 20): Flow<List<RecordEntity>> =
@@ -47,6 +49,11 @@ class RecordRepository(private val dao: RecordDao) {
         dao.lastOfType(babyId, type)
 
     suspend fun delete(record: RecordEntity) {
+        // 照片记录连文件一起删，避免孤儿文件堆积；相册等调用方原有的显式删文件是幂等的，重复调用无害
+        if (record.type == RecordType.PHOTO) {
+            val path = runCatching { JSONObject(record.detailJson).optString("path") }.getOrNull()
+            if (!path.isNullOrBlank()) PhotoStorage.delete(AppGraph.appContext, path)
+        }
         AppGraph.database.syncTombstoneDao()
             .upsert(SyncTombstoneEntity("record", record.uuid, System.currentTimeMillis()))
         dao.delete(record)
